@@ -23,41 +23,27 @@ import java.util.Random;
 
 public class Main extends Application {
 
-    //Stores the height and width of the screen
-    public static int SCREENWIDTH;
-    public static int SCREENHEIGHT;
+    public static Display d;
 
-    //All items are given a size relative to the "scale"
-    public static float SCALE = 1;
-
-    //Stores the time since the last frame was loaded
-    public static long deltaTime;
-    private static long lastFrameTime = 0;
-
-    //Stores the number of frames that have been computed
-    public static long frames = 0;
-
-    //This list stores all of particles in the entire simulation
+    //This list stores all of particles in the entire simulation todo [ParticleController]
     private ArrayList<Particle> particles = new ArrayList<>();
 
-    //Gravitational Constant
-    public static double GRAV_CONSTANT = 1;
-    public static final double DAMPENING = 0.00000001;
+    //The size of the particle created when the user clicks on the screen todo [ParticleController]
+    public static int particleSize = 100;
 
-    //Self-Explanatory
+    //Stores the points at which the user clicks and releases the right mouse button respectively todo [ParticleController]
+    Point2D[] particlePositions = new Point2D[2];
+
+    //Self-Explanatory todo [ParticleController]
     public static boolean paused = false;
     public static boolean drawPath = false;
     public static boolean drawMesh = false;
 
-    //Images
-    private static Image background;
-    private static Image pauseScreen;
+    //Gravitational Constant todo [DisplayController]
+    public static double GRAV_CONSTANT = 1;
+    public static final double DAMPENING = 0.00000001;
 
-    //The size of the particle created when the user clicks on the screen
-    public static int particleSize = 100;
 
-    //Stores the points at which the user clicks and releases the right mouse button respectively
-    Point2D[] particlePositions = new Point2D[2];
 
     //All graphics are drawn using the GraphicsContext
     private GraphicsContext gc;
@@ -67,9 +53,11 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         //Detecting the screen width and height of the monitor to make the game more responsive
-        SCREENHEIGHT = (int) Screen.getPrimary().getBounds().getHeight();
-        SCREENWIDTH = (int) Screen.getPrimary().getBounds().getWidth();
+        /*SCREENHEIGHT = (int) Screen.getPrimary().getBounds().getHeight();
+        SCREENWIDTH = (int) Screen.getPrimary().getBounds().getWidth();*/
 
+        d = new Display((int) Screen.getPrimary().getBounds().getWidth(),
+                (int) Screen.getPrimary().getBounds().getHeight(), 1);
 
 
         //TESTING AREA
@@ -83,13 +71,14 @@ public class Main extends Application {
         particles.get(3).setVelocity(new Point2D(-1, 0));*/
 
         //ORBITALS TEST
-/*        particles.add(new Particle(1000, Color.RED, new Point2D(900, 700)));
-        particles.add(new Particle(100, Color.RED, new Point2D(700, 800)));*/
-//        particles.add(new Particle(100, Color.BLUE, new Point2D(0, 500), new Point2D(5, 0)));
+/*        particles.add(new Particle(100000, Color.RED, new Point2D(1000, 500)));
+
+        particles.add(new Particle(1000000, Color.RED, new Point2D(600, 700)));*/
+
 
         //RANDOM PARTICLE TEST
         for (int i = 0; i < 100; i++) {
-            particles.add(new Particle((int)rand(10,10), Color.BLACK, new Point2D(rand(0, 1920), rand(0, 1080))));
+            particles.add(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand(0, 1920), rand(0, 1080))));
         }
 
 
@@ -116,7 +105,7 @@ public class Main extends Application {
         //Responding to when a mouse button is pressed
         scene.setOnMousePressed(event -> {
             if(event.getButton() == MouseButton.PRIMARY)
-                particles.add(new Particle(particleSize, Color.BLUE, new Point2D(event.getX()+16, event.getY()+16)));
+                particles.add(new Particle(particleSize, Color.BLUE, new Point2D(event.getX(), event.getY())));
             else if(event.getButton() == MouseButton.SECONDARY) {
                 particlePositions[0] = new Point2D(event.getX(), event.getY());
                 drawPath = true;
@@ -128,7 +117,7 @@ public class Main extends Application {
             if(event.getButton() == MouseButton.SECONDARY) {
                 particlePositions[1] = new Point2D(event.getX(), event.getY());
                 drawPath = false;
-                particles.add(new Particle(particleSize, Color.DARKBLUE, particlePositions[0].add(16,16), new Point2D(
+                particles.add(new Particle(particleSize, Color.DARKBLUE, particlePositions[0], new Point2D(
                         (particlePositions[1].getX() - particlePositions[0].getX()) / 50,
                         (particlePositions[1].getY() - particlePositions[0].getY()) / 50
                 )));
@@ -147,22 +136,19 @@ public class Main extends Application {
 
         //Graphical operations
         primaryStage.setScene(scene);
-        Canvas canvas = new Canvas(SCREENWIDTH, SCREENHEIGHT);
+        Canvas canvas = new Canvas(d.getScreenWidth(), d.getScreenHeight());
         root.getChildren().add(canvas);
         gc = canvas.getGraphicsContext2D();
-
-
-
 
 
         //This is the main game loop - everything is controlled from here
         new AnimationTimer() {
             @Override
             public void handle(long now) {
-                lastFrameTime = System.nanoTime(); //stores the time before each frame
+                long lastFrameTime = System.nanoTime(); //stores the time before each frame
                 update(); //handles all of the calculations
                 render(gc); //handles all of the graphical operations
-                deltaTime = System.nanoTime() - lastFrameTime; //stores the time taken for each frame
+                d.setDeltaTime(System.nanoTime() - lastFrameTime); //stores the time taken for each frame
             }
         }.start();
         primaryStage.show();
@@ -172,10 +158,7 @@ public class Main extends Application {
     private void render(GraphicsContext graphics) {
 
         //Clearing the screen
-        graphics.clearRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
-
-        //Drawing the Background
-//        graphics.drawImage(background, 0, 0, SCREENWIDTH, SCREENHEIGHT);
+        graphics.clearRect(0, 0, d.getScreenWidth(), d.getScreenHeight());
 
         //Drawing all of the Particles
         particles.forEach(p -> p.draw(graphics));
@@ -183,21 +166,18 @@ public class Main extends Application {
         //Drawing the average FPS in the corner of the screen
         graphics.setFill(Color.GREEN);
         graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-        graphics.fillText("FPS: " + getFPS(), SCREENWIDTH-65, 12);
-        graphics.fillText("Particles: " + particles.size(), SCREENWIDTH-100, 24);
+        graphics.fillText("FPS: " + getFPS(), d.getScreenWidth()-65, 12);
+        graphics.fillText("Particles: " + particles.size(), d.getScreenWidth()-100, 24);
 
         //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
-        if(drawPath) {
+        if(drawPath)
             drawPathLine(graphics);
-        }
+
 
         //Drawing the mesh
         if(drawMesh)
             drawMesh(graphics);
 
-        //Drawing the pause screen when the game is paused
-        if(paused)
-            graphics.drawImage(pauseScreen, 0, 0, SCREENWIDTH, SCREENHEIGHT);
     }
 
     private void drawMesh(GraphicsContext graphics) {
@@ -216,14 +196,14 @@ public class Main extends Application {
     private void drawPathLine(GraphicsContext graphics) {
         graphics.setStroke(Color.RED);
         graphics.strokeLine( // TODO: 11-Jul-19 This function makes the screen freeze for a few milliseconds when it is run
-                particlePositions[0].getX()+16, particlePositions[0].getY()+16,
-                particlePositions[0].getX()+16 - (particlePositions[0].getX()-16 - MouseInfo.getPointerInfo().getLocation().getX()+16)/5,
-                particlePositions[0].getY()+16 - (particlePositions[0].getY()-16 - MouseInfo.getPointerInfo().getLocation().getY()+16)/5
+                particlePositions[0].getX(), particlePositions[0].getY(),
+                particlePositions[0].getX() - (particlePositions[0].getX() - MouseInfo.getPointerInfo().getLocation().getX())/5,
+                particlePositions[0].getY() - (particlePositions[0].getY() - MouseInfo.getPointerInfo().getLocation().getY())/5
         );
     }
 
     private double getFPS() {
-        return Math.round(1/(deltaTime+Float.MIN_VALUE) * 10000000 * 10000.0)/1000.0;
+        return Math.round(1/(d.getDeltaTime()+Float.MIN_VALUE) * 10000000 * 10000.0)/1000.0;
     }
 
     private void update() {
@@ -277,48 +257,38 @@ public class Main extends Application {
                         //This calculates the total force between two particles. If the two particles are the same, the returned force is -1
                         // TODO: 04-Jul-19 There seems to be an element of randomness in the way the particles behave. This should not be the case. This is almost certainly linked to the variation in the FPS
                         //EXPERIMENTAL CODE ------------------------------------------------------------------------------------
-
+                        // TODO: 06/01/2020 try eliminating negative values from atan2(), and give them back with signum()
                         double xDifference = particles.get(i).getLocation().getX() - particles.get(j).getLocation().getX();
-                        double yDifference = particles.get(i).getLocation().getY() - particles.get(j).getLocation().getY(); // TODO: 06/01/2020 xForce and yForce are different
+                        double yDifference = particles.get(i).getLocation().getY() - particles.get(j).getLocation().getY();
 
                         double force = 0;
                         double xF = 0;
                         double yF = 0;
 
-
-
                         if(particles.get(i) != particles.get(j)) {
 
                             force = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() /
-                                    (Math.pow(particles.get(j).getLocation().distance(particles.get(i).getLocation()), 2) + DAMPENING));
+                                    (Math.pow(particles.get(j).getLocation().distance(particles.get(i).getLocation()), 2) + DAMPENING)); //always positive
 
-                            double alpha = (Math.atan2(xDifference, yDifference) > 0) ? Math.atan2(xDifference, yDifference) : -Math.atan2(xDifference, yDifference) + Math.PI; //[RADIANS OUTPUT]
-                            alpha = Math.atan2(xDifference, yDifference);
+                            double alpha = Math.atan2(xDifference, yDifference); //only place where minus could arise
                             double angle = Math.toDegrees(alpha);
 
-                            xF = force * Math.sin(alpha);
+                            xF = force * Math.sin(alpha); //Don't even know why this works properly
                             yF = force * Math.cos(alpha);
 
                             particles.get(j).accelerate(new Point2D(xF/particles.get(j).getMass(), yF/particles.get(j).getMass()));
+
+                            // TODO: 06/01/2020 The xF and yF seem to reverse randomly when two particles are remaining
+                            /**
+                             * This effect only happens when a foreign particle is placed
+                             * The repulsion only happens between the large particle and the foreign particles
+                             * THE ERROR ONLY HAPPENS WHEN THE FOREIGN PARTICLE IS LARGER THAN A CERTAIN SIZE
+                             * THE ERROR OCCURS WHEN TWO PARTICLES JOIN WHILE ATTRACTED TO A THIRD
+                             * does it only happen at a certain size, or is it only noticeable at a certain size
+                             * for this interaction to occur, 3 particles need to reorder
+                             *
+                             * The angle is always calculated correctly*/
                         }
-
-
-
-/*                        double xForce = 0;
-                        double yForce = 0; // Divisibility by zero error
-
-                        if(particles.get(i) != particles.get(j)) {
-                             xForce = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() / (Math.pow(xDifference, 2)*(Math.signum(xDifference)) + DAMPENING));
-                             yForce = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() / (Math.pow(yDifference, 2)*(Math.signum(yDifference)) + DAMPENING));
-
-                            particles.get(j).accelerate(new Point2D(xForce / particles.get(j).getMass(),
-                                     yForce / particles.get(j).getMass()));
-                        }*/
-
-
-
-
-
                     }
                 }
             }
@@ -330,7 +300,7 @@ public class Main extends Application {
         particles.forEach(p -> p.tick());
 
         //Incrementing the number of elapsed frames (for development purposes)
-        frames++;
+        d.incFrames();
     }
 
 

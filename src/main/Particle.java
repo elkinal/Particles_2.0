@@ -6,6 +6,8 @@ package main;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import static java.lang.Math.*;
 
 public class Particle {
@@ -31,7 +33,7 @@ public class Particle {
 
     //Getting the diameter of the particle (assuming it is 3D) // TODO: 03-Jul-19 double-check if this is correct
     public double getDimensions() {
-        return 2 * cbrt(mass * 3/4 * PI) * Main.SCALE;
+        return 2 * cbrt(mass * ((float)3/4) * PI) * Main.d.getScale();
     }
 
     public Point2D getCenterLocation() {
@@ -74,24 +76,11 @@ public class Particle {
 
     //Checks if the position of the particle is within the boundaries of the screen
     private boolean onScreen() {
-        return !(location.getX() + getDimensions() < 0 || location.getX() - getDimensions() > Main.SCREENWIDTH
-                || location.getY() + getDimensions() < 0 || location.getY() - getDimensions() > Main.SCREENHEIGHT);
+        return !(location.getX() + getDimensions() < 0 || location.getX() - getDimensions() > Main.d.getScreenWidth()
+                || location.getY() + getDimensions() < 0 || location.getY() - getDimensions() > Main.d.getScreenHeight());
     }
     //This method contains all the calculations performed on the particle each frame
     public void tick() {
-        //Moving the particle
-
-        //EXPERIMENTAL - TERMINAL VELOCITY
-        /*int t = 10;
-        if(velocity.getX() > t)
-            velocity = new Point2D(t, velocity.getY());
-        if(velocity.getX() < -t)
-            velocity = new Point2D(-t, velocity.getY());
-        if(velocity.getY() > t)
-            velocity = new Point2D(velocity.getX(), t);
-        if(velocity.getY() < -t)
-            velocity = new Point2D(velocity.getX(), -t);*/
-
         //Accelerating the particle
         if(!Main.paused) {
             location = location.add(velocity); // TODO: 06/01/2020 Implement DELTATIME
@@ -106,8 +95,8 @@ public class Particle {
     //This method draws the particle on the GraphicsContext each frame
     public void draw(GraphicsContext graphics) {
         if(onScreen()) {
-            graphics.setStroke(color);
-            graphics.strokeOval(getCenterLocation().getX(), getCenterLocation().getY(), getDimensions(), getDimensions());
+            graphics.setFill(Paint.valueOf("black"));
+            graphics.fillOval(getCenterLocation().getX(), getCenterLocation().getY(), getDimensions(), getDimensions());
         }
     }
 
