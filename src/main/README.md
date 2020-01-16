@@ -58,17 +58,17 @@ double force = 0;
 double xF = 0;
 double yF = 0;
 
-	if(particles.get(i) != particles.get(j)) {
-		force = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() /
+if(particles.get(i) != particles.get(j)) {
+	force = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() /
 			(Math.pow(particles.get(j).getLocation().distance(particles.get(i).getLocation()), 2) + DAMPENING)); //always positive
 
-		double alpha = Math.atan2(xDifference, yDifference); //only place where minus could arise
-		double angle = Math.toDegrees(alpha);
+	double alpha = Math.atan2(xDifference, yDifference); //only place where minus could arise
+	double angle = Math.toDegrees(alpha);
 
-                xF = force * Math.sin(alpha); //Don't even know why this works properly
-                yF = force * Math.cos(alpha);
+        xF = force * Math.sin(alpha); //Don't even know why this works properly
+        yF = force * Math.cos(alpha);
 
-                particles.get(j).accelerate(new Point2D(xF/particles.get(j).getMass(), yF/particles.get(j).getMass()));
+        particles.get(j).accelerate(new Point2D(xF/particles.get(j).getMass(), yF/particles.get(j).getMass()));
 ```
 ```java
 //Overall, the compact source code looks like this:
