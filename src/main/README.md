@@ -1,4 +1,5 @@
 
+
 # Particles
 This is a visual representation of an N-body simulation. This project will demonstrate how celestial bodies interact with each other when under the influence of gravity. This project incorporates realistic physics in order to make the simulation as accurate as possible.
 
@@ -50,26 +51,28 @@ double force = (particles.get(i) != particles.get(j)) ?
 ![Gravity Equation](http://www.alexeyelkin.com/images/force.gif)
 >**Newton's Second Law**: In an inertial frame of reference, the vector  [sum](https://en.wikipedia.org/wiki/Vector_sum "Vector sum")  of the  [forces](https://en.wikipedia.org/wiki/Forces "Forces")  **F**  on an object is equal to the  [mass](https://en.wikipedia.org/wiki/Mass "Mass")  _m_  of that object multiplied by the  [acceleration](https://en.wikipedia.org/wiki/Acceleration "Acceleration")  **a**  of the object:  **F**  =  _m_**a**. (It is assumed here that the mass  _m_  is constant). - _**Wikipedia**_
 ```java
-//The First 2 Lines are used to determine the difference between the locations fo the two particles
-double xDifference = particles.get(i).getLocation().getX() - particles.get(j).getLocation().getX();  
-double yDifference = particles.get(i).getLocation().getY() - particles.get(j).getLocation().getY();  
+						//This calculates the total force between two particles. If the two particles are the same, the returned force is -1
+                        // TODO: 04-Jul-19 There seems to be an element of randomness in the way the particles behave. This should not be the case. This is almost certainly linked to the variation in the FPS
+                        // TODO: 06/01/2020 try eliminating negative values from atan2(), and give them back with signum()
+                        double xDifference = particles.get(i).getLocation().getX() - particles.get(j).getLocation().getX();
+                        double yDifference = particles.get(i).getLocation().getY() - particles.get(j).getLocation().getY();
 
-/* The Third Line ensures that the particle is only accelerate if the force is larger than zero. 
-Thus, impossible "negative forces" are ruled out */
-if (force > 0) {  
+                        double force = 0;
+                        double xF = 0;
+                        double yF = 0;
 
-    particles.get(j).accelerate( //Acceleration Function
-	    new Point2D(Math.signum(xDifference) * force / particles.get(j).getMass(),  //X axis acceleration
-			  Math.signum(yDifference) * force / particles.get(j).getMass()) //Y axis acceleration
-	);  
-	
-/* Math.signum() is a function that returns the absolute value of a number while factoring in the coefficient. 
-eg: signum(35) = 1, signum(-78) = -1, signum(-174) = -1 
-	
-The signum() value is used in the program to set the direction for the particle to travel in
-	
-Since F = ma, a = F/m, so the acceleration of the particle is it's (force / mass) */
-}
+                        if(particles.get(i) != particles.get(j)) {
+
+                            force = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() /
+                                    (Math.pow(particles.get(j).getLocation().distance(particles.get(i).getLocation()), 2) + DAMPENING)); //always positive
+
+                            double alpha = Math.atan2(xDifference, yDifference); //only place where minus could arise
+                            double angle = Math.toDegrees(alpha);
+
+                            xF = force * Math.sin(alpha); 
+                            yF = force * Math.cos(alpha);
+
+                            particles.get(j).accelerate(new Point2D(xF/particles.get(j).getMass(), yF/particles.get(j).getMass()));
 ```
 ```java
 //Overall, the compact source code looks like this:
