@@ -88,43 +88,51 @@ if (force > 0) {
 ![Gravity Equation](http://www.alexeyelkin.com/images/moment.gif)
 >Where  **_V_**  is the final velocity, which is given by the formula above.
 ```java
-particles.get(j).setVelocity(  
-        new Point2D(  
-				//This represents the X velocity of the particle      
-                (particles.get(j).getMass() * particles.get(j).getVelocity().getX() +  
-                        particles.get(i).getMass() * particles.get(i).getVelocity().getX()) /  
-                        (particles.get(j).getMass() + particles.get(i).getMass()),  
-  
-				//This represents the Y velocity of the particle
-			(particles.get(j).getMass() * particles.get(j).getVelocity().getY() +  
-                        particles.get(i).getMass() * particles.get(i).getVelocity().getY()) /  
-                        (particles.get(j).getMass() + particles.get(i).getMass())  
-        )  
-);
+if (particles.get(j).getLocation().distance(particles.get(i).getLocation())
+        < (particles.get(j).getDimensions() / 2 + particles.get(i).getDimensions() / 2)
+        && particles.get(i) != particles.get(j)) {
+    if (particles.get(j).getMass() > particles.get(i).getMass()) {
+        //Larger particle changes its trajectory according to Newton's Third Law
+        particles.get(j).setVelocity(
+                new Point2D(
+                        (particles.get(j).getMass() * particles.get(j).getVelocity().getX() +
+                                particles.get(i).getMass() * particles.get(i).getVelocity().getX()) /
+                                (particles.get(j).getMass() + particles.get(i).getMass()),
+
+                        (particles.get(j).getMass() * particles.get(j).getVelocity().getY() +
+                                particles.get(i).getMass() * particles.get(i).getVelocity().getY()) /
+                                (particles.get(j).getMass() + particles.get(i).getMass())
+                )
+        );
+        //Larger particle absorbs smaller particle
+        particles.get(j).addMass(particles.get(i).getMass());
+        particles.remove(particles.get(i));
+    } else {
+
+        //Larger particle changes its trajectory according to Newton's Third Law
+        particles.get(i).setVelocity(
+                new Point2D(
+                        (particles.get(j).getMass() * particles.get(j).getVelocity().getX() +
+                                particles.get(i).getMass() * particles.get(i).getVelocity().getX()) /
+                                (particles.get(i).getMass() + particles.get(j).getMass()),
+
+                        (particles.get(j).getMass() * particles.get(j).getVelocity().getY() +
+                                particles.get(i).getMass() * particles.get(i).getVelocity().getY()) /
+                                (particles.get(i).getMass() + particles.get(j).getMass())
+                )
+        );
+        //Larger particle absorbs smaller particle
+        particles.get(i).addMass(particles.get(j).getMass());
+        particles.remove(particles.get(j));
+    }
+
+}
 /* particles.get(j) represents the larger particle, and particles.get(i) represents the smaller particle
 When the two particles collide, the larger particle will absorb the smaller particle.
-Therefore, the velocity of the particle produced will change along with its mass
-The code above represents the new velocity of this particle. */
+Therefore, the velocity of the particle produced will change along with its mass*/
 
 ```
-```java
-//Overall, the compact source code looks like this
-particles.get(j).setVelocity(  
-        new Point2D(  
-                (particles.get(j).getMass() * particles.get(j).getVelocity().getX() +  
-                        particles.get(i).getMass() * particles.get(i).getVelocity().getX()) /  
-                        (particles.get(j).getMass() + particles.get(i).getMass()),  
-  
-			(particles.get(j).getMass() * particles.get(j).getVelocity().getY() +  
-                        particles.get(i).getMass() * particles.get(i).getVelocity().getY()) /  
-                        (particles.get(j).getMass() + particles.get(i).getMass())  
-        )  
-);
 
-//Larger particle absorbs smaller particle  
-particles.get(i).addMass(particles.get(j).getMass());  
-particles.remove(particles.get(j));
-```
 ***
 ## Images
 ![Gravity Equation](http://www.alexeyelkin.com/images/many.png)
