@@ -8,6 +8,8 @@ public class Display {
     private long deltaTime;
     private long frames;
 
+    private boolean drawMesh;
+
     public Display() {
 
     }
@@ -27,6 +29,13 @@ public class Display {
         this.deltaTime = deltaTime;
     }
 
+    public void setDrawMesh(boolean drawMesh) {
+        this.drawMesh = drawMesh;
+    }
+
+    public void flipDrawMesh() {
+        this.drawMesh = !this.drawMesh;
+    }
 
     //Getters for all the variables
     public int getScreenHeight() {
@@ -45,6 +54,9 @@ public class Display {
         return deltaTime;
     }
 
+    public boolean isDrawMesh() {
+        return drawMesh;
+    }
     public long getFrames() {
         return frames;
     }

@@ -37,7 +37,7 @@ public class Main extends Application {
     //Self-Explanatory todo [ParticleController]
     public static boolean paused = false;
     public static boolean drawPath = false;
-    public static boolean drawMesh = false;
+//    public static boolean drawMesh = false;
 
     //Gravitational Constant todo [DisplayController]
     public static double GRAV_CONSTANT = 1;
@@ -60,6 +60,7 @@ public class Main extends Application {
                 (int) Screen.getPrimary().getBounds().getHeight(), 1);
 
 
+//        System.out.println(d.getScreenWidth() + " - " + d.getScreenHeight());
         //TESTING AREA
         /*particles.add(new Particle(300, Color.RED, new Point2D(500, 500)));
         particles.add(new Particle(100, Color.RED, new Point2D(800, 500)));
@@ -77,8 +78,8 @@ public class Main extends Application {
 
 
         //RANDOM PARTICLE TEST
-        for (int i = 0; i < 100; i++) {
-            particles.add(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand(0, 1920), rand(0, 1080))));
+        for (int i = 0; i < 200; i++) {
+            particles.add(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand(0, d.getScreenWidth()), rand(0, d.getScreenHeight()))));
         }
 
 
@@ -98,7 +99,7 @@ public class Main extends Application {
             if(event.getCode() == KeyCode.SPACE)
                 paused = !paused;
             if(event.getCode() == KeyCode.M)
-                drawMesh = !drawMesh;
+                d.flipDrawMesh();
         });
 
 
@@ -175,7 +176,7 @@ public class Main extends Application {
 
 
         //Drawing the mesh
-        if(drawMesh)
+        if(d.isDrawMesh())
             drawMesh(graphics);
 
     }
