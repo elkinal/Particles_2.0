@@ -14,10 +14,11 @@ public class Display {
 
     }
 
-    public Display(int screenWidth, int screenHeight, double scale) {
+    public Display(int screenWidth, int screenHeight, double scale, boolean drawMesh) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.scale = scale;
+        this.drawMesh = drawMesh;
     }
 
     //Setters and Mutators

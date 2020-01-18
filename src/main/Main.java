@@ -24,12 +24,13 @@ import java.util.Random;
 public class Main extends Application {
 
     public static Display d;
+    public static ParticleController p = new ParticleController(100);
 
     //This list stores all of particles in the entire simulation todo [ParticleController]
     private ArrayList<Particle> particles = new ArrayList<>();
 
     //The size of the particle created when the user clicks on the screen todo [ParticleController]
-    public static int particleSize = 100;
+//    public static int particleSize = 100;
 
     //Stores the points at which the user clicks and releases the right mouse button respectively todo [ParticleController]
     Point2D[] particlePositions = new Point2D[2];
@@ -37,9 +38,8 @@ public class Main extends Application {
     //Self-Explanatory todo [ParticleController]
     public static boolean paused = false;
     public static boolean drawPath = false;
-//    public static boolean drawMesh = false;
 
-    //Gravitational Constant todo [DisplayController]
+    //Gravitational Constant todo [ParticleController]
     public static double GRAV_CONSTANT = 1;
     public static final double DAMPENING = 0.00000001;
 
@@ -57,7 +57,7 @@ public class Main extends Application {
         SCREENWIDTH = (int) Screen.getPrimary().getBounds().getWidth();*/
 
         d = new Display((int) Screen.getPrimary().getBounds().getWidth(),
-                (int) Screen.getPrimary().getBounds().getHeight(), 1);
+                (int) Screen.getPrimary().getBounds().getHeight(), 1, false);
 
 
 //        System.out.println(d.getScreenWidth() + " - " + d.getScreenHeight());
@@ -106,7 +106,7 @@ public class Main extends Application {
         //Responding to when a mouse button is pressed
         scene.setOnMousePressed(event -> {
             if(event.getButton() == MouseButton.PRIMARY)
-                particles.add(new Particle(particleSize, Color.BLUE, new Point2D(event.getX(), event.getY())));
+                particles.add(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX(), event.getY())));
             else if(event.getButton() == MouseButton.SECONDARY) {
                 particlePositions[0] = new Point2D(event.getX(), event.getY());
                 drawPath = true;
@@ -118,7 +118,7 @@ public class Main extends Application {
             if(event.getButton() == MouseButton.SECONDARY) {
                 particlePositions[1] = new Point2D(event.getX(), event.getY());
                 drawPath = false;
-                particles.add(new Particle(particleSize, Color.DARKBLUE, particlePositions[0], new Point2D(
+                particles.add(new Particle(p.getParticleSize(), Color.DARKBLUE, particlePositions[0], new Point2D(
                         (particlePositions[1].getX() - particlePositions[0].getX()) / 50,
                         (particlePositions[1].getY() - particlePositions[0].getY()) / 50
                 )));
@@ -129,9 +129,9 @@ public class Main extends Application {
         //Allowing the user to change the size of the created particle using the scroll wheel
         scene.setOnScroll(event -> {
             if(event.getDeltaY() < 0)
-                particleSize += 50;
+                p.incParticleSize(50);
             else
-                particleSize -= (particleSize > 50) ? 50 : 0;
+                p.incParticleSize(-50); // TODO: 18/01/2020 Mutator protection is needed here
         });
 
 
