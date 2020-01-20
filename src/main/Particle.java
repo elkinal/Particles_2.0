@@ -82,7 +82,7 @@ public class Particle {
     //This method contains all the calculations performed on the particle each frame
     public void tick() {
         //Accelerating the particle
-        if(!Main.paused) {
+        if(!Main.p.isPaused()) {
             location = location.add(velocity); // TODO: 06/01/2020 Implement DELTATIME
 //            location = location.add(velocity.getX() * Main.deltaTime/1000000, velocity.getY() * Main.deltaTime/1000000);
 

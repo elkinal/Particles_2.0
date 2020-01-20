@@ -24,19 +24,16 @@ import java.util.Random;
 public class Main extends Application {
 
     public static Display d;
-    public static ParticleController p = new ParticleController(100);
+    public static ParticleController p = new ParticleController(100, false);
 
     //This list stores all of particles in the entire simulation todo [ParticleController]
     private ArrayList<Particle> particles = new ArrayList<>();
-
-    //The size of the particle created when the user clicks on the screen todo [ParticleController]
-//    public static int particleSize = 100;
 
     //Stores the points at which the user clicks and releases the right mouse button respectively todo [ParticleController]
     Point2D[] particlePositions = new Point2D[2];
 
     //Self-Explanatory todo [ParticleController]
-    public static boolean paused = false;
+//    public static boolean paused = false;
     public static boolean drawPath = false;
 
     //Gravitational Constant todo [ParticleController]
@@ -97,7 +94,7 @@ public class Main extends Application {
         //Responding to Keystrokes
         scene.setOnKeyPressed(event -> {
             if(event.getCode() == KeyCode.SPACE)
-                paused = !paused;
+                p.unpause();
             if(event.getCode() == KeyCode.M)
                 d.flipDrawMesh();
         });
@@ -210,7 +207,7 @@ public class Main extends Application {
     private void update() {
         //All calculations go here
         //Physics Calculations - MOVEMENT
-        if(!paused) {
+        if(!p.isPaused()) {
             for (int i = 0; i < particles.size(); i++) {
                 for (int j = 0; j < particles.size(); j++) {
                     //Physics Calculations - COLLISION DETECTION

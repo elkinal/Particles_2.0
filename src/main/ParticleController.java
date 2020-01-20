@@ -7,11 +7,16 @@ public class ParticleController {
 
     private int particleSize;
 
-    public ParticleController(int particleSize) {
+    private boolean paused;
+
+    public ParticleController(int particleSize, boolean paused) {
         this.particleSize = particleSize;
+        this.paused = paused;
     }
 
     //Setters and Mutators
+
+    //Particle sizes
     public void setParticleSize(int particleSize) {
         this.particleSize = particleSize;
     }
@@ -22,8 +27,19 @@ public class ParticleController {
         else this.particleSize += particleSize;
     }
 
+
+    //Boolean Toggles
+    public void unpause() {
+        paused = !paused;
+    }
+
     //Getters for all methods
     public int getParticleSize() {
         return particleSize;
     }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
 }
