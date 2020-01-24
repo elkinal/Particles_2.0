@@ -24,10 +24,10 @@ import java.util.Random;
 public class Main extends Application {
 
     public static Display d;
-    public static ParticleController p = new ParticleController(100, false);
+    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>());
 
     //This list stores all of particles in the entire simulation todo [ParticleController]
-    private ArrayList<Particle> particles = new ArrayList<>();
+//    private ArrayList<Particle> particles = new ArrayList<>();
 
     //Stores the points at which the user clicks and releases the right mouse button respectively todo [ParticleController]
     Point2D[] particlePositions = new Point2D[2];
@@ -59,6 +59,7 @@ public class Main extends Application {
 
 //        System.out.println(d.getScreenWidth() + " - " + d.getScreenHeight());
         //TESTING AREA
+        //F=MA TEST ---------------------------------------------------------
         /*particles.add(new Particle(300, Color.RED, new Point2D(500, 500)));
         particles.add(new Particle(100, Color.RED, new Point2D(800, 500)));
         particles.add(new Particle(100, Color.RED, new Point2D(1000, 500)));
@@ -68,15 +69,15 @@ public class Main extends Application {
         particles.get(2).setVelocity(new Point2D(-1, 0));
         particles.get(3).setVelocity(new Point2D(-1, 0));*/
 
-        //ORBITALS TEST
+        //BROKEN ORBITALS TEST -------------------------------------------------
 /*        particles.add(new Particle(100000, Color.RED, new Point2D(1000, 500)));
 
         particles.add(new Particle(1000000, Color.RED, new Point2D(600, 700)));*/
 
 
         //RANDOM PARTICLE TEST
-        for (int i = 0; i < 200; i++) {
-            particles.add(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand(0, d.getScreenWidth()), rand(0, d.getScreenHeight()))));
+        for (int i = 0; i < 100; i++) {
+            p.addParticle(new Particle((int)rand(2,10), Color.BLACK, new Point2D(rand((d.getScreenWidth()-d.getScreenHeight())/2, (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)), rand(0, d.getScreenHeight()))));
         }
 
 
@@ -103,7 +104,7 @@ public class Main extends Application {
         //Responding to when a mouse button is pressed
         scene.setOnMousePressed(event -> {
             if(event.getButton() == MouseButton.PRIMARY)
-                particles.add(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX(), event.getY())));
+                p.addParticle(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX(), event.getY())));
             else if(event.getButton() == MouseButton.SECONDARY) {
                 particlePositions[0] = new Point2D(event.getX(), event.getY());
                 drawPath = true;
@@ -115,7 +116,7 @@ public class Main extends Application {
             if(event.getButton() == MouseButton.SECONDARY) {
                 particlePositions[1] = new Point2D(event.getX(), event.getY());
                 drawPath = false;
-                particles.add(new Particle(p.getParticleSize(), Color.DARKBLUE, particlePositions[0], new Point2D(
+                p.addParticle(new Particle(p.getParticleSize(), Color.DARKBLUE, particlePositions[0], new Point2D(
                         (particlePositions[1].getX() - particlePositions[0].getX()) / 50,
                         (particlePositions[1].getY() - particlePositions[0].getY()) / 50
                 )));
@@ -159,13 +160,13 @@ public class Main extends Application {
         graphics.clearRect(0, 0, d.getScreenWidth(), d.getScreenHeight());
 
         //Drawing all of the Particles
-        particles.forEach(p -> p.draw(graphics));
+        p.getParticles().forEach(p -> p.draw(graphics));
 
         //Drawing the average FPS in the corner of the screen
         graphics.setFill(Color.GREEN);
         graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
         graphics.fillText("FPS: " + getFPS(), d.getScreenWidth()-65, 12);
-        graphics.fillText("Particles: " + particles.size(), d.getScreenWidth()-100, 24);
+        graphics.fillText("Particles: " + p.getParticleNumber(), d.getScreenWidth()-100, 24);
 
         //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
         if(drawPath)
@@ -180,11 +181,13 @@ public class Main extends Application {
 
     private void drawMesh(GraphicsContext graphics) {
         graphics.setLineWidth(0.5);
-        for (int i = 0; i < particles.size(); i++) {
-            for (int j = 0; j < particles.size(); j++) {
-                if(particles.get(i) != particles.get(j)) {
+        int particleNumber = p.getParticleNumber();
+
+        for (int i = 0; i < particleNumber; i++) {
+            for (int j = 0; j < particleNumber; j++) {
+                if(p.getParticle(i) != p.getParticle(j)) {
                     graphics.setStroke(Color.GREEN);
-                    graphics.strokeLine(particles.get(i).getLocation().getX(), particles.get(i).getLocation().getY(), particles.get(j).getLocation().getX(), particles.get(j).getLocation().getY());
+                    graphics.strokeLine(p.getParticle(i).getLocation().getX(), p.getParticle(i).getLocation().getY(), p.getParticle(j).getLocation().getX(), p.getParticle(j).getLocation().getY());
                 }
             }
         }
@@ -208,46 +211,46 @@ public class Main extends Application {
         //All calculations go here
         //Physics Calculations - MOVEMENT
         if(!p.isPaused()) {
-            for (int i = 0; i < particles.size(); i++) {
-                for (int j = 0; j < particles.size(); j++) {
+            for (int i = 0; i < p.getParticleNumber(); i++) {
+                for (int j = 0; j < p.getParticleNumber(); j++) {
                     //Physics Calculations - COLLISION DETECTION
                     // TODO: 05-Jul-19 unexpected ArrayIndexOutOfBoundsException can rarely arise in the collision detection part -------------------------------------
-                    if (particles.get(j).getLocation().distance(particles.get(i).getLocation())
-                            < (particles.get(j).getDimensions() / 2 + particles.get(i).getDimensions() / 2)
-                            && particles.get(i) != particles.get(j)) {
-                        if (particles.get(j).getMass() > particles.get(i).getMass()) {
+                    if (p.getParticle(j).getLocation().distance(p.getParticle(i).getLocation())
+                            < (p.getParticle(j).getDimensions() / 2 + p.getParticle(i).getDimensions() / 2)
+                            && p.getParticle(i) != p.getParticle(j)) {
+                        if (p.getParticle(j).getMass() > p.getParticle(i).getMass()) {
                             //Larger particle changes its trajectory according to Newton's Third Law
-                            particles.get(j).setVelocity(
+                            p.getParticle(j).setVelocity(
                                     new Point2D(
-                                            (particles.get(j).getMass() * particles.get(j).getVelocity().getX() +
-                                                    particles.get(i).getMass() * particles.get(i).getVelocity().getX()) /
-                                                    (particles.get(j).getMass() + particles.get(i).getMass()),
+                                            (p.getParticle(j).getMass() * p.getParticle(j).getVelocity().getX() +
+                                                    p.getParticle(i).getMass() * p.getParticle(i).getVelocity().getX()) /
+                                                    (p.getParticle(j).getMass() + p.getParticle(i).getMass()),
 
-                                            (particles.get(j).getMass() * particles.get(j).getVelocity().getY() +
-                                                    particles.get(i).getMass() * particles.get(i).getVelocity().getY()) /
-                                                    (particles.get(j).getMass() + particles.get(i).getMass())
+                                            (p.getParticle(j).getMass() * p.getParticle(j).getVelocity().getY() +
+                                                    p.getParticle(i).getMass() * p.getParticle(i).getVelocity().getY()) /
+                                                    (p.getParticle(j).getMass() + p.getParticle(i).getMass())
                                     )
                             );
                             //Larger particle absorbs smaller particle
-                            particles.get(j).addMass(particles.get(i).getMass());
-                            particles.remove(particles.get(i));
+                            p.getParticle(j).addMass(p.getParticle(i).getMass());
+                            p.destroyParticle(i);
                         } else {
 
                             //Larger particle changes its trajectory according to Newton's Third Law
-                            particles.get(i).setVelocity(
+                            p.getParticle(i).setVelocity(
                                     new Point2D(
-                                            (particles.get(j).getMass() * particles.get(j).getVelocity().getX() +
-                                                    particles.get(i).getMass() * particles.get(i).getVelocity().getX()) /
-                                                    (particles.get(i).getMass() + particles.get(j).getMass()),
+                                            (p.getParticle(j).getMass() * p.getParticle(j).getVelocity().getX() +
+                                                    p.getParticle(i).getMass() * p.getParticle(i).getVelocity().getX()) /
+                                                    (p.getParticle(i).getMass() + p.getParticle(j).getMass()),
 
-                                            (particles.get(j).getMass() * particles.get(j).getVelocity().getY() +
-                                                    particles.get(i).getMass() * particles.get(i).getVelocity().getY()) /
-                                                    (particles.get(i).getMass() + particles.get(j).getMass())
+                                            (p.getParticle(j).getMass() * p.getParticle(j).getVelocity().getY() +
+                                                    p.getParticle(i).getMass() * p.getParticle(i).getVelocity().getY()) /
+                                                    (p.getParticle(i).getMass() + p.getParticle(j).getMass())
                                     )
                             );
                             //Larger particle absorbs smaller particle
-                            particles.get(i).addMass(particles.get(j).getMass());
-                            particles.remove(particles.get(j));
+                            p.getParticle(i).addMass(p.getParticle(j).getMass());
+                            p.destroyParticle(j);
                         }
 
                     }
@@ -256,25 +259,25 @@ public class Main extends Application {
                         // TODO: 04-Jul-19 There seems to be an element of randomness in the way the particles behave. This should not be the case. This is almost certainly linked to the variation in the FPS
                         //EXPERIMENTAL CODE ------------------------------------------------------------------------------------
                         // TODO: 06/01/2020 try eliminating negative values from atan2(), and give them back with signum()
-                        double xDifference = particles.get(i).getLocation().getX() - particles.get(j).getLocation().getX();
-                        double yDifference = particles.get(i).getLocation().getY() - particles.get(j).getLocation().getY();
+                        double xDifference = p.getParticle(i).getLocation().getX() - p.getParticle(j).getLocation().getX();
+                        double yDifference = p.getParticle(i).getLocation().getY() - p.getParticle(j).getLocation().getY();
 
                         double force = 0;
                         double xF = 0;
                         double yF = 0;
 
-                        if(particles.get(i) != particles.get(j)) {
+                        if(p.getParticle(i) != p.getParticle(j)) {
 
-                            force = GRAV_CONSTANT * (particles.get(i).getMass() * particles.get(j).getMass() /
-                                    (Math.pow(particles.get(j).getLocation().distance(particles.get(i).getLocation()), 2) + DAMPENING)); //always positive
+                            force = GRAV_CONSTANT * (p.getParticle(i).getMass() * p.getParticle(j).getMass() /
+                                    (Math.pow(p.getParticle(j).getLocation().distance(p.getParticle(i).getLocation()), 2) + DAMPENING)); //always positive
 
                             double alpha = Math.atan2(xDifference, yDifference); //only place where minus could arise
                             double angle = Math.toDegrees(alpha);
 
-                            xF = force * Math.sin(alpha); //Don't even know why this works properly
+                            xF = force * Math.sin(alpha);
                             yF = force * Math.cos(alpha);
 
-                            particles.get(j).accelerate(new Point2D(xF/particles.get(j).getMass(), yF/particles.get(j).getMass()));
+                            p.getParticle(j).accelerate(new Point2D(xF/p.getParticle(j).getMass(), yF/p.getParticle(j).getMass()));
 
                             // TODO: 06/01/2020 The xF and yF seem to reverse randomly when two particles are remaining
                             /**
@@ -295,7 +298,7 @@ public class Main extends Application {
 
 
         //Ticking the Particles
-        particles.forEach(p -> p.tick());
+        p.getParticles().forEach(p -> p.tick());
 
         //Incrementing the number of elapsed frames (for development purposes)
         d.incFrames();
