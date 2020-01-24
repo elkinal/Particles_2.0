@@ -3,16 +3,22 @@ package main;
 import java.util.ArrayList;
 
 public class ParticleController {
-    private ArrayList<Particle> particles;
 
+    private ArrayList<Particle> particles;
     private int particleSize;
+    private double gravConstant;
+    private double dampening;
 
     private boolean paused;
 
-    public ParticleController(int particleSize, boolean paused, ArrayList<Particle> particles) {
+
+
+    public ParticleController(int particleSize, boolean paused, ArrayList<Particle> particles, double gravConstant, double dampening) {
         this.particleSize = particleSize;
         this.paused = paused;
         this.particles = particles;
+        this.gravConstant = gravConstant;
+        this.dampening = dampening;
     }
 
     //Setters and Mutators
@@ -62,5 +68,11 @@ public class ParticleController {
         return particles.get(i);
     }
 
+    public double getGravConstant() {
+        return gravConstant;
+    }
 
+    public double getDampening() {
+        return dampening;
+    }
 }

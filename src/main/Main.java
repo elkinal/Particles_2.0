@@ -24,23 +24,12 @@ import java.util.Random;
 public class Main extends Application {
 
     public static Display d;
-    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>());
-
-    //This list stores all of particles in the entire simulation todo [ParticleController]
-//    private ArrayList<Particle> particles = new ArrayList<>();
+    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 1, 0.00000001);
 
     //Stores the points at which the user clicks and releases the right mouse button respectively todo [ParticleController]
     Point2D[] particlePositions = new Point2D[2];
 
-    //Self-Explanatory todo [ParticleController]
-//    public static boolean paused = false;
     public static boolean drawPath = false;
-
-    //Gravitational Constant todo [ParticleController]
-    public static double GRAV_CONSTANT = 1;
-    public static final double DAMPENING = 0.00000001;
-
-
 
     //All graphics are drawn using the GraphicsContext
     private GraphicsContext gc;
@@ -49,9 +38,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        //Detecting the screen width and height of the monitor to make the game more responsive
-        /*SCREENHEIGHT = (int) Screen.getPrimary().getBounds().getHeight();
-        SCREENWIDTH = (int) Screen.getPrimary().getBounds().getWidth();*/
 
         d = new Display((int) Screen.getPrimary().getBounds().getWidth(),
                 (int) Screen.getPrimary().getBounds().getHeight(), 1, false);
@@ -268,8 +254,8 @@ public class Main extends Application {
 
                         if(p.getParticle(i) != p.getParticle(j)) {
 
-                            force = GRAV_CONSTANT * (p.getParticle(i).getMass() * p.getParticle(j).getMass() /
-                                    (Math.pow(p.getParticle(j).getLocation().distance(p.getParticle(i).getLocation()), 2) + DAMPENING)); //always positive
+                            force = p.getGravConstant() * (p.getParticle(i).getMass() * p.getParticle(j).getMass() /
+                                    (Math.pow(p.getParticle(j).getLocation().distance(p.getParticle(i).getLocation()), 2) + p.getDampening())); //always positive
 
                             double alpha = Math.atan2(xDifference, yDifference); //only place where minus could arise
                             double angle = Math.toDegrees(alpha);
