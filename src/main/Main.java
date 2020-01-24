@@ -26,7 +26,6 @@ public class Main extends Application {
     public static Display d;
     public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 1, 0.00000001);
 
-    //Stores the points at which the user clicks and releases the right mouse button respectively todo [ParticleController]
     Point2D[] particlePositions = new Point2D[2];
 
     public static boolean drawPath = false;
@@ -43,7 +42,7 @@ public class Main extends Application {
                 (int) Screen.getPrimary().getBounds().getHeight(), 1, false);
 
 
-//        System.out.println(d.getScreenWidth() + " - " + d.getScreenHeight());
+
         //TESTING AREA
         //F=MA TEST ---------------------------------------------------------
         /*particles.add(new Particle(300, Color.RED, new Point2D(500, 500)));
@@ -115,7 +114,7 @@ public class Main extends Application {
             if(event.getDeltaY() < 0)
                 p.incParticleSize(50);
             else
-                p.incParticleSize(-50); // TODO: 18/01/2020 Mutator protection is needed here
+                p.incParticleSize(-50);
         });
 
 
