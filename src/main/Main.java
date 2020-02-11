@@ -217,10 +217,12 @@ public class Main extends Application {
                                     )
                             );
                             //Larger particle absorbs smaller particle
+                            double initialKineticEnergy = p.getParticle(i).getKE() + p.getParticle(j).getKE();
+
                             p.getParticle(j).addMass(p.getParticle(i).getMass()); // TODO: 11/02/2020 turn the kinetic energy into temperature
 
-                            //EXPERIMENTAL
-                            p.getParticle(j).incTemperature(p.getParticle(i).getKE() / p.getParticle(j).getMass() * 1); //Q=mc * dT
+                            double finalKineticEnergy = p.getParticle(j).getKE();
+                            p.getParticle(j).incTemperature(initialKineticEnergy - finalKineticEnergy);
 
                             p.destroyParticle(i);
                         } else {
@@ -238,10 +240,12 @@ public class Main extends Application {
                                     )
                             );
                             //Larger particle absorbs smaller particle
+                            double initialKineticEnergy = p.getParticle(i).getKE() + p.getParticle(j).getKE();
+
                             p.getParticle(i).addMass(p.getParticle(j).getMass());
 
-                            //EXPERIMENTAL
-                            p.getParticle(i).incTemperature(p.getParticle(j).getKE() / p.getParticle(i).getMass() * 1); //Q=mc * dT
+                            double finalKineticEnergy = p.getParticle(i).getKE();
+                            p.getParticle(i).incTemperature(initialKineticEnergy - finalKineticEnergy);
 
                             p.destroyParticle(j);
                         }
