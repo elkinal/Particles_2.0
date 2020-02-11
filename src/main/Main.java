@@ -62,7 +62,7 @@ public class Main extends Application {
 
         //RANDOM PARTICLE TEST
         for (int i = 0; i < 100; i++) {
-            p.addParticle(new Particle((int)rand(2,10), Color.BLACK, new Point2D(rand((d.getScreenWidth()-d.getScreenHeight())/2, (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)), rand(0, d.getScreenHeight()))));
+            p.addParticle(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand((d.getScreenWidth()-d.getScreenHeight())/2, (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)), rand(0, d.getScreenHeight()))));
         }
 
 
@@ -217,7 +217,11 @@ public class Main extends Application {
                                     )
                             );
                             //Larger particle absorbs smaller particle
-                            p.getParticle(j).addMass(p.getParticle(i).getMass());
+                            p.getParticle(j).addMass(p.getParticle(i).getMass()); // TODO: 11/02/2020 turn the kinetic energy into temperature
+
+                            //EXPERIMENTAL
+                            p.getParticle(j).incTemperature(p.getParticle(i).getKE() / p.getParticle(j).getMass() * 1); //Q=mc * dT
+
                             p.destroyParticle(i);
                         } else {
 
@@ -235,6 +239,10 @@ public class Main extends Application {
                             );
                             //Larger particle absorbs smaller particle
                             p.getParticle(i).addMass(p.getParticle(j).getMass());
+
+                            //EXPERIMENTAL
+                            p.getParticle(i).incTemperature(p.getParticle(j).getKE() / p.getParticle(i).getMass() * 1); //Q=mc * dT
+
                             p.destroyParticle(j);
                         }
 

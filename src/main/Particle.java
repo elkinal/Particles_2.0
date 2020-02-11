@@ -7,6 +7,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 import static java.lang.Math.*;
 
@@ -15,12 +17,14 @@ public class Particle {
     private Color color;
     private Point2D location;
     private Point2D velocity;
+    private float temperature;
 
     public Particle(int mass, Color color, Point2D location) {
         this.mass = mass;
         this.color = color;
         this.location = location;
         this.velocity = new Point2D(0, 0);
+        this.temperature = 0; // The initial temperature of each particle is zero
     }
 
     //A constructor that includes the velocity as well as all of the other parameters
@@ -59,6 +63,21 @@ public class Particle {
         this.mass += mass;
     }
 
+    //Getter for the temperature
+    public float getTemperature() {
+        return temperature;
+    }
+
+    //Setter for the temperature
+    public void setTemperature(float temperature) {
+        this.temperature = temperature;
+    }
+
+    //Mutator incrementer for the temperature
+    public void incTemperature(double temperature) {
+        this.temperature += temperature;
+    }
+
     //This function changes the velocity off the particle
     public void accelerate(Point2D velocity) {
         this.velocity = this.velocity.add(velocity);
@@ -72,6 +91,11 @@ public class Particle {
     //Getter for the velocity
     public Point2D getVelocity() {
         return this.velocity;
+    }
+
+    //Getter for the kinetic energy
+    public double getKE() {
+        return 0.5 * mass * pow(velocity.magnitude(), 2);
     }
 
     //Checks if the position of the particle is within the boundaries of the screen
@@ -97,6 +121,11 @@ public class Particle {
         if(onScreen()) {
             graphics.setFill(Paint.valueOf("black"));
             graphics.fillOval(getCenterLocation().getX(), getCenterLocation().getY(), getDimensions(), getDimensions());
+
+            //Drawing the temperature of the particle next to it
+            graphics.setFill(Paint.valueOf("red"));
+            graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
+            graphics.fillText(String.valueOf(temperature) + "K", getCenterLocation().getX(), getCenterLocation().getY());
         }
     }
 

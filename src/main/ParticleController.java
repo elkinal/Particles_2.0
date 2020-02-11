@@ -8,7 +8,6 @@ public class ParticleController {
     private int particleSize;
     private double gravConstant;
     private double dampening;
-
     private boolean paused;
 
 
