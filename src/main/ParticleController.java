@@ -45,6 +45,9 @@ public class ParticleController {
         this.scale += scale;
     }
 
+    public void incDisplacement(int x, int y) {
+        displacement = displacement.add(x, y);
+    }
 
     //Particle sizes
     public void setParticleSize(int particleSize) {
@@ -104,5 +107,7 @@ public class ParticleController {
         return dampening;
     }
 
-
+    public Point2D getDisplacement() {
+        return displacement;
+    }
 }

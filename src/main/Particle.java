@@ -112,8 +112,8 @@ public class Particle {
 
     //Checks if the position of the particle is within the boundaries of the screen
     private boolean onScreen() {
-        return !(location.getX() + getDimensions() < 0 || location.getX() - getDimensions() > Main.d.getScreenWidth()
-                || location.getY() + getDimensions() < 0 || location.getY() - getDimensions() > Main.d.getScreenHeight());
+        return !(location.getX() + getDimensions() < 0 || location.getX() - getDimensions() > Main.d.getScreenWidth()/Main.p.getScale()
+                || location.getY() + getDimensions() < 0 || location.getY() - getDimensions() > Main.d.getScreenHeight()/Main.p.getScale());
     }
     //This method contains all the calculations performed on the particle each frame
     public void tick() {
@@ -132,14 +132,14 @@ public class Particle {
     public void draw(GraphicsContext graphics) {
         if(onScreen()) {
 //            graphics.setFill(Paint.valueOf("black"));
-            graphics.strokeOval(getScaledCenterLocation().getX(), getScaledCenterLocation().getY(), getDimensions(), getDimensions());
+            graphics.strokeOval(getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY(), getDimensions(), getDimensions());
 
 
             //Drawing the temperature of the particle next to it
             if(Main.p.isDrawParticles()) {
                 graphics.setFill(Paint.valueOf("red"));
                 graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
-                graphics.fillText(String.valueOf(temperature) + "K", getCenterLocation().getX(), getCenterLocation().getY());
+                graphics.fillText(String.valueOf(temperature) + "K", getScaledCenterLocation().getX(), getScaledCenterLocation().getY());
             }
 /*            System.out.println(Main.p.getParticles().get(0));
             System.out.println(Main.p.getParticles().get(1));*/

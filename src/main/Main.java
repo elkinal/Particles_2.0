@@ -26,7 +26,7 @@ public class Main extends Application {
     // TODO: 12/02/2020 A Scale must be added
 
     public static Display d;
-    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 0.01, 0.00000001);
+    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 1, 0.00000001);
 
     Point2D[] particlePositions = new Point2D[2];
 
@@ -88,18 +88,27 @@ public class Main extends Application {
             if(event.getCode() == KeyCode.T)
                 p.flipDrawParticles();
             if(event.getCode() == KeyCode.E)
-                p.incScale(0.1);
+                p.incParticleSize(50);
             if(event.getCode() == KeyCode.Q)
-                p.incScale(-0.1);
+                p.incParticleSize(-50);
+
+            if(event.getCode() == KeyCode.W)
+                p.incDisplacement(0, -20);
+            if(event.getCode() == KeyCode.A)
+                p.incDisplacement(-20, 0);
+            if(event.getCode() == KeyCode.S)
+                p.incDisplacement(0, 20);
+            if(event.getCode() == KeyCode.D)
+                p.incDisplacement(20, 0);
         });
 
 
         //Responding to when a mouse button is pressed
         scene.setOnMousePressed(event -> {
             if(event.getButton() == MouseButton.PRIMARY)
-                p.addParticle(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX()/p.getScale(), event.getY()/p.getScale())));
+                p.addParticle(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX()/p.getScale() - p.getDisplacement().getX()/p.getScale(), event.getY()/p.getScale() - p.getDisplacement().getY()/p.getScale())));
             else if(event.getButton() == MouseButton.SECONDARY) {
-                particlePositions[0] = new Point2D(event.getX()/p.getScale(), event.getY()/p.getScale());
+                particlePositions[0] = new Point2D(event.getX()/p.getScale() - p.getDisplacement().getX()/p.getScale(), event.getY()/p.getScale() - p.getDisplacement().getY()/p.getScale());
                 drawPath = true;
             }
         });
@@ -107,7 +116,7 @@ public class Main extends Application {
         //Responding to when the right mouse button is released
         scene.setOnMouseReleased(event -> {
             if(event.getButton() == MouseButton.SECONDARY) {
-                particlePositions[1] = new Point2D(event.getX()/p.getScale(), event.getY()/p.getScale());
+                particlePositions[1] = new Point2D(event.getX()/p.getScale() - p.getDisplacement().getX()/p.getScale(), event.getY()/p.getScale() - p.getDisplacement().getY()/p.getScale());
                 drawPath = false;
                 p.addParticle(new Particle(p.getParticleSize(), Color.DARKBLUE, particlePositions[0], new Point2D(
                         (particlePositions[1].getX() - particlePositions[0].getX()) / (50),
@@ -120,9 +129,9 @@ public class Main extends Application {
         //Allowing the user to change the size of the created particle using the scroll wheel
         scene.setOnScroll(event -> {
             if(event.getDeltaY() < 0)
-                p.incParticleSize(50);
+                p.incScale(0.01);
             else
-                p.incParticleSize(-50);
+                p.incScale(-0.01);
         });
 
 
@@ -182,10 +191,10 @@ public class Main extends Application {
 
                     graphics.setStroke(Color.GREEN);
                     graphics.strokeLine(
-                            p.getParticle(i).getScaledLocation().getX(),
-                            p.getParticle(i).getScaledLocation().getY(),
-                            p.getParticle(j).getScaledLocation().getX(),
-                            p.getParticle(j).getScaledLocation().getY()
+                            p.getParticle(i).getScaledLocation().getX() + p.getDisplacement().getX(),
+                            p.getParticle(i).getScaledLocation().getY() + p.getDisplacement().getY(),
+                            p.getParticle(j).getScaledLocation().getX() + p.getDisplacement().getX(),
+                            p.getParticle(j).getScaledLocation().getY() + p.getDisplacement().getY()
                     );
 
                 }
