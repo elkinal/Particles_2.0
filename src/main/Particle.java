@@ -37,16 +37,28 @@ public class Particle {
 
     //Getting the diameter of the particle (assuming it is 3D) // TODO: 03-Jul-19 double-check if this is correct
     public double getDimensions() {
-        return 2 * cbrt(mass * ((float)3/4) * PI) * Main.d.getScale();
+        return 2 * cbrt(mass * ((float)3/4) * PI) * Main.p.getScale();
+    }
+
+    public double getRealDimensions() {
+        return 2 * cbrt(mass * ((float)3/4) * PI);
     }
 
     public Point2D getCenterLocation() {
         return new Point2D(location.getX() - getDimensions()/2, location.getY() - getDimensions()/2);
     }
 
+    public Point2D getScaledCenterLocation() {
+        return new Point2D(location.getX()*Main.p.getScale() - getDimensions()/2, location.getY()*Main.p.getScale() - getDimensions()/2);
+    }
+
     //Getter and Setter for the location of the particle
     public Point2D getLocation() {
         return location;
+    }
+
+    public Point2D getScaledLocation() {
+        return new Point2D(location.getX() * Main.p.getScale(), location.getY() * Main.p.getScale());
     }
 
     public void setLocation(Point2D location) {
@@ -119,14 +131,18 @@ public class Particle {
     //This method draws the particle on the GraphicsContext each frame
     public void draw(GraphicsContext graphics) {
         if(onScreen()) {
-            graphics.setFill(Paint.valueOf("black"));
-            graphics.fillOval(getCenterLocation().getX(), getCenterLocation().getY(), getDimensions(), getDimensions());
+//            graphics.setFill(Paint.valueOf("black"));
+            graphics.strokeOval(getScaledCenterLocation().getX(), getScaledCenterLocation().getY(), getDimensions(), getDimensions());
+
 
             //Drawing the temperature of the particle next to it
-            graphics.setFill(Paint.valueOf("red"));
-            graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
-            graphics.fillText(String.valueOf(temperature) + "K", getCenterLocation().getX(), getCenterLocation().getY());
+            if(Main.p.isDrawParticles()) {
+                graphics.setFill(Paint.valueOf("red"));
+                graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
+                graphics.fillText(String.valueOf(temperature) + "K", getCenterLocation().getX(), getCenterLocation().getY());
+            }
+/*            System.out.println(Main.p.getParticles().get(0));
+            System.out.println(Main.p.getParticles().get(1));*/
         }
     }
-
 }

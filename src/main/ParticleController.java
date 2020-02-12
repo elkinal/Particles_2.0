@@ -1,5 +1,7 @@
 package main;
 
+import javafx.geometry.Point2D;
+
 import java.util.ArrayList;
 
 public class ParticleController {
@@ -9,6 +11,10 @@ public class ParticleController {
     private double gravConstant;
     private double dampening;
     private boolean paused;
+    private boolean drawParticles;
+
+    private double scale;
+    private Point2D displacement;
 
 
 
@@ -18,6 +24,8 @@ public class ParticleController {
         this.particles = particles;
         this.gravConstant = gravConstant;
         this.dampening = dampening;
+        this.scale = 1;
+        this.displacement = new Point2D(0, 0);
     }
 
     //Setters and Mutators
@@ -28,6 +36,15 @@ public class ParticleController {
     public void destroyParticle(int i) {
         particles.remove(particles.get(i));
     }
+
+    public void setScale(double scale) {
+        this.scale = scale;
+    }
+
+    public void incScale(double scale) {
+        this.scale += scale;
+    }
+
 
     //Particle sizes
     public void setParticleSize(int particleSize) {
@@ -46,6 +63,10 @@ public class ParticleController {
         paused = !paused;
     }
 
+    public void flipDrawParticles() {
+        drawParticles = !drawParticles;
+    }
+
     //Getters for all methods
     public int getParticleSize() {
         return particleSize;
@@ -53,6 +74,14 @@ public class ParticleController {
 
     public boolean isPaused() {
         return paused;
+    }
+
+    public boolean isDrawParticles() {
+        return drawParticles;
+    }
+
+    public double getScale() {
+        return scale;
     }
 
     public ArrayList<Particle> getParticles() {
@@ -74,4 +103,6 @@ public class ParticleController {
     public double getDampening() {
         return dampening;
     }
+
+
 }

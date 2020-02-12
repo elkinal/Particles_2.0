@@ -23,8 +23,10 @@ import java.util.Random;
 
 public class Main extends Application {
 
+    // TODO: 12/02/2020 A Scale must be added
+
     public static Display d;
-    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 1, 0.00000001);
+    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 0.01, 0.00000001);
 
     Point2D[] particlePositions = new Point2D[2];
 
@@ -61,9 +63,9 @@ public class Main extends Application {
 
 
         //RANDOM PARTICLE TEST
-        for (int i = 0; i < 100; i++) {
+/*        for (int i = 0; i < 100; i++) {
             p.addParticle(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand((d.getScreenWidth()-d.getScreenHeight())/2, (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)), rand(0, d.getScreenHeight()))));
-        }
+        }*/
 
 
         //Forces the game to be played full-screen
@@ -83,15 +85,21 @@ public class Main extends Application {
                 p.unpause();
             if(event.getCode() == KeyCode.M)
                 d.flipDrawMesh();
+            if(event.getCode() == KeyCode.T)
+                p.flipDrawParticles();
+            if(event.getCode() == KeyCode.E)
+                p.incScale(0.1);
+            if(event.getCode() == KeyCode.Q)
+                p.incScale(-0.1);
         });
 
 
         //Responding to when a mouse button is pressed
         scene.setOnMousePressed(event -> {
             if(event.getButton() == MouseButton.PRIMARY)
-                p.addParticle(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX(), event.getY())));
+                p.addParticle(new Particle(p.getParticleSize(), Color.BLUE, new Point2D(event.getX()/p.getScale(), event.getY()/p.getScale())));
             else if(event.getButton() == MouseButton.SECONDARY) {
-                particlePositions[0] = new Point2D(event.getX(), event.getY());
+                particlePositions[0] = new Point2D(event.getX()/p.getScale(), event.getY()/p.getScale());
                 drawPath = true;
             }
         });
@@ -99,11 +107,11 @@ public class Main extends Application {
         //Responding to when the right mouse button is released
         scene.setOnMouseReleased(event -> {
             if(event.getButton() == MouseButton.SECONDARY) {
-                particlePositions[1] = new Point2D(event.getX(), event.getY());
+                particlePositions[1] = new Point2D(event.getX()/p.getScale(), event.getY()/p.getScale());
                 drawPath = false;
                 p.addParticle(new Particle(p.getParticleSize(), Color.DARKBLUE, particlePositions[0], new Point2D(
-                        (particlePositions[1].getX() - particlePositions[0].getX()) / 50,
-                        (particlePositions[1].getY() - particlePositions[0].getY()) / 50
+                        (particlePositions[1].getX() - particlePositions[0].getX()) / (50),
+                        (particlePositions[1].getY() - particlePositions[0].getY()) / (50)
                 )));
             }
         });
@@ -153,9 +161,9 @@ public class Main extends Application {
         graphics.fillText("FPS: " + getFPS(), d.getScreenWidth()-65, 12);
         graphics.fillText("Particles: " + p.getParticleNumber(), d.getScreenWidth()-100, 24);
 
-        //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
+/*        //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
         if(drawPath)
-            drawPathLine(graphics);
+            drawPathLine(graphics);*/
 
 
         //Drawing the mesh
@@ -171,22 +179,29 @@ public class Main extends Application {
         for (int i = 0; i < particleNumber; i++) {
             for (int j = 0; j < particleNumber; j++) {
                 if(p.getParticle(i) != p.getParticle(j)) {
+
                     graphics.setStroke(Color.GREEN);
-                    graphics.strokeLine(p.getParticle(i).getLocation().getX(), p.getParticle(i).getLocation().getY(), p.getParticle(j).getLocation().getX(), p.getParticle(j).getLocation().getY());
+                    graphics.strokeLine(
+                            p.getParticle(i).getScaledLocation().getX(),
+                            p.getParticle(i).getScaledLocation().getY(),
+                            p.getParticle(j).getScaledLocation().getX(),
+                            p.getParticle(j).getScaledLocation().getY()
+                    );
+
                 }
             }
         }
         graphics.setLineWidth(1);
     }
 
-    private void drawPathLine(GraphicsContext graphics) {
+/*    private void drawPathLine(GraphicsContext graphics) {
         graphics.setStroke(Color.RED);
         graphics.strokeLine( // TODO: 11-Jul-19 This function makes the screen freeze for a few milliseconds when it is run
                 particlePositions[0].getX(), particlePositions[0].getY(),
                 particlePositions[0].getX() - (particlePositions[0].getX() - MouseInfo.getPointerInfo().getLocation().getX())/5,
                 particlePositions[0].getY() - (particlePositions[0].getY() - MouseInfo.getPointerInfo().getLocation().getY())/5
         );
-    }
+    }*/
 
     private double getFPS() {
         return Math.round(1/(d.getDeltaTime()+Float.MIN_VALUE) * 10000000 * 10000.0)/1000.0;
@@ -200,9 +215,10 @@ public class Main extends Application {
                 for (int j = 0; j < p.getParticleNumber(); j++) {
                     //Physics Calculations - COLLISION DETECTION
                     // TODO: 05-Jul-19 unexpected ArrayIndexOutOfBoundsException can rarely arise in the collision detection part -------------------------------------
-                    if (p.getParticle(j).getLocation().distance(p.getParticle(i).getLocation())
-                            < (p.getParticle(j).getDimensions() / 2 + p.getParticle(i).getDimensions() / 2)
+                    if ((p.getParticle(j).getLocation().distance(p.getParticle(i).getLocation())) // TODO: 12/02/2020 SCALING NEEDS TO BE ADDED ON THIS LINE
+                            < (p.getParticle(j).getRealDimensions() / 2 + p.getParticle(i).getRealDimensions() / 2)
                             && p.getParticle(i) != p.getParticle(j)) {
+
                         if (p.getParticle(j).getMass() > p.getParticle(i).getMass()) {
                             //Larger particle changes its trajectory according to Newton's Third Law
                             p.getParticle(j).setVelocity(
