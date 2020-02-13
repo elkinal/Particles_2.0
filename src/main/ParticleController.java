@@ -15,6 +15,7 @@ public class ParticleController {
 
     private double scale;
     private Point2D displacement;
+    private double timeScale;
 
 
 
@@ -24,7 +25,9 @@ public class ParticleController {
         this.particles = particles;
         this.gravConstant = gravConstant;
         this.dampening = dampening;
+
         this.scale = 1;
+        this.timeScale = 1/gravConstant;
         this.displacement = new Point2D(0, 0);
     }
 
@@ -85,6 +88,10 @@ public class ParticleController {
 
     public double getScale() {
         return scale;
+    }
+
+    public double getTimeScale() {
+        return timeScale;
     }
 
     public ArrayList<Particle> getParticles() {

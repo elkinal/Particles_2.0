@@ -26,7 +26,7 @@ public class Main extends Application {
     // TODO: 12/02/2020 A Scale must be added
 
     public static Display d;
-    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 1, 0.00000001);
+    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 6.67430 * Math.pow(10, -11), 0.00000001);
 
     Point2D[] particlePositions = new Point2D[2];
 
@@ -35,7 +35,7 @@ public class Main extends Application {
     //All graphics are drawn using the GraphicsContext
     private GraphicsContext gc;
 
-
+    //Formation of binary stars vs one thicc cluster
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -63,9 +63,9 @@ public class Main extends Application {
 
 
         //RANDOM PARTICLE TEST
-/*        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             p.addParticle(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand((d.getScreenWidth()-d.getScreenHeight())/2, (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)), rand(0, d.getScreenHeight()))));
-        }*/
+        }
 
 
         //Forces the game to be played full-screen
@@ -119,8 +119,8 @@ public class Main extends Application {
                 particlePositions[1] = new Point2D(event.getX()/p.getScale() - p.getDisplacement().getX()/p.getScale(), event.getY()/p.getScale() - p.getDisplacement().getY()/p.getScale());
                 drawPath = false;
                 p.addParticle(new Particle(p.getParticleSize(), Color.DARKBLUE, particlePositions[0], new Point2D(
-                        (particlePositions[1].getX() - particlePositions[0].getX()) / (50),
-                        (particlePositions[1].getY() - particlePositions[0].getY()) / (50)
+                        ((particlePositions[1].getX() - particlePositions[0].getX()) / (50)) * p.getGravConstant(),
+                        ((particlePositions[1].getY() - particlePositions[0].getY()) / (50)) * p.getGravConstant()
                 )));
             }
         });
@@ -173,8 +173,9 @@ public class Main extends Application {
         //Drawing the average FPS in the corner of the screen
         graphics.setFill(Color.GREEN);
         graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-        graphics.fillText("FPS: " + getFPS(), d.getScreenWidth()-65, 12);
-        graphics.fillText("Particles: " + p.getParticleNumber(), d.getScreenWidth()-100, 24);
+        graphics.fillText("FPS: " + getFPS(), d.getScreenWidth()-270, 12);
+        graphics.fillText("Particles: " + p.getParticleNumber(), d.getScreenWidth()-270, 24);
+        graphics.fillText("Time Scaling: x" + p.getTimeScale(), d.getScreenWidth()-270, 36);
 
 /*        //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
         if(drawPath)

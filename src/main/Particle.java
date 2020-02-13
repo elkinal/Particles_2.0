@@ -112,14 +112,14 @@ public class Particle {
 
     //Checks if the position of the particle is within the boundaries of the screen
     private boolean onScreen() {
-        return !(location.getX() + getDimensions() < 0 || location.getX() - getDimensions() > Main.d.getScreenWidth()/Main.p.getScale()
-                || location.getY() + getDimensions() < 0 || location.getY() - getDimensions() > Main.d.getScreenHeight()/Main.p.getScale());
+        return !(location.getX() + getDimensions() < -Main.p.getDisplacement().getX()/Main.p.getScale() || location.getX() - getDimensions() > Main.d.getScreenWidth()/Main.p.getScale() - Main.p.getDisplacement().getX()
+                || location.getY() + getDimensions() < -Main.p.getDisplacement().getY()/Main.p.getScale() || location.getY() - getDimensions() > Main.d.getScreenHeight()/Main.p.getScale() - Main.p.getDisplacement().getY());
     }
     //This method contains all the calculations performed on the particle each frame
     public void tick() {
         //Accelerating the particle
         if(!Main.p.isPaused()) {
-            location = location.add(velocity); // TODO: 06/01/2020 Implement DELTATIME
+            location = location.add(velocity.add(velocity.getX()*Main.p.getTimeScale(), velocity.getY()*Main.p.getTimeScale())); // TODO: 06/01/2020 Implement DELTATIME
 //            location = location.add(velocity.getX() * Main.deltaTime/1000000, velocity.getY() * Main.deltaTime/1000000);
 
 //            System.out.println(location);
@@ -135,14 +135,12 @@ public class Particle {
             graphics.fillOval(getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY(), getDimensions(), getDimensions());
 
 
-            //Drawing the temperature of the particle next to it
+            //Drawing the temperature of the particle next to it todo Check the temperature scaling Q=mcT
             if(Main.p.isDrawParticles()) {
                 graphics.setFill(Paint.valueOf("red"));
                 graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
-                graphics.fillText(String.valueOf(temperature) + "K", getScaledCenterLocation().getX(), getScaledCenterLocation().getY());
+                graphics.fillText(String.valueOf(temperature) + "K", getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY());
             }
-/*            System.out.println(Main.p.getParticles().get(0));
-            System.out.println(Main.p.getParticles().get(1));*/
         }
     }
 }
