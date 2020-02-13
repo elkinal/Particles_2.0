@@ -128,10 +128,16 @@ public class Main extends Application {
 
         //Allowing the user to change the size of the created particle using the scroll wheel
         scene.setOnScroll(event -> {
-            if(event.getDeltaY() < 0)
+            if(event.getDeltaY() < 0) {
                 p.incScale(0.01);
-            else
+                p.incDisplacement(0, -d.getScreenHeight()*0.005);
+                p.incDisplacement(-d.getScreenWidth()*0.005, 0);
+            }
+            else {
                 p.incScale(-0.01);
+                p.incDisplacement(0, d.getScreenHeight()*0.005);
+                p.incDisplacement(d.getScreenWidth()*0.005, 0);
+            }
         });
 
 

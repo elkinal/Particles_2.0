@@ -45,7 +45,7 @@ public class ParticleController {
         this.scale += scale;
     }
 
-    public void incDisplacement(int x, int y) {
+    public void incDisplacement(double x, double y) {
         displacement = displacement.add(x, y);
     }
 

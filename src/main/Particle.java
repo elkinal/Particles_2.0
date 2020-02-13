@@ -131,8 +131,8 @@ public class Particle {
     //This method draws the particle on the GraphicsContext each frame
     public void draw(GraphicsContext graphics) {
         if(onScreen()) {
-//            graphics.setFill(Paint.valueOf("black"));
-            graphics.strokeOval(getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY(), getDimensions(), getDimensions());
+            graphics.setFill(Paint.valueOf("black"));
+            graphics.fillOval(getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY(), getDimensions(), getDimensions());
 
 
             //Drawing the temperature of the particle next to it
