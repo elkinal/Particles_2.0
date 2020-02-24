@@ -41,7 +41,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
 
         d = new Display((int) Screen.getPrimary().getBounds().getWidth(),
-                (int) Screen.getPrimary().getBounds().getHeight(), 1, false);
+                (int) Screen.getPrimary().getBounds().getHeight(), 1, false, true);
 
 
 
@@ -62,9 +62,22 @@ public class Main extends Application {
         particles.add(new Particle(1000000, Color.RED, new Point2D(600, 700)));*/
 
 
+        // TODO: 18/02/2020 add temperature sensitivity scaling. allow the user to change the sensitivity of the temperature.
+
         //RANDOM PARTICLE TEST
-        for (int i = 0; i < 100; i++) {
-            p.addParticle(new Particle((int)rand(2,2), Color.BLACK, new Point2D(rand((d.getScreenWidth()-d.getScreenHeight())/2, (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)), rand(0, d.getScreenHeight()))));
+        for (int i = 0; i < 100; i++) { // TODO: 13/02/2020 Scale this appropriately
+            p.addParticle(new Particle(
+                    (int) rand(2,200), //MASS
+                    Color.BLACK, //COLOR
+                    /*new Point2D(rand(
+                            (d.getScreenWidth()-d.getScreenHeight())/2,
+                            (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)
+                    ), rand(0, d.getScreenHeight()))*/
+                    new Point2D(rand( //Adding particles beyond the screen
+                            Main.d.getScreenWidth() * -5,
+                            Main.d.getScreenWidth() * 5
+                    ), rand(Main.d.getScreenHeight()*-5, d.getScreenHeight()*5))
+            ));
         }
 
 
@@ -87,10 +100,13 @@ public class Main extends Application {
                 d.flipDrawMesh();
             if(event.getCode() == KeyCode.T)
                 p.flipDrawParticles();
-            if(event.getCode() == KeyCode.E)
-                p.incParticleSize(50);
             if(event.getCode() == KeyCode.Q)
-                p.incParticleSize(-50);
+                p.flipShowData();
+
+            if(event.getCode() == KeyCode.E)
+                p.incParticleSize(100);
+            if(event.getCode() == KeyCode.Q)
+                p.incParticleSize(-100);
 
             if(event.getCode() == KeyCode.W)
                 p.incDisplacement(0, -20);
@@ -133,7 +149,7 @@ public class Main extends Application {
                 p.incDisplacement(0, -d.getScreenHeight()*0.005);
                 p.incDisplacement(-d.getScreenWidth()*0.005, 0);
             }
-            else {
+            else if (p.getScale() > 0.01) {
                 p.incScale(-0.01);
                 p.incDisplacement(0, d.getScreenHeight()*0.005);
                 p.incDisplacement(d.getScreenWidth()*0.005, 0);
@@ -186,7 +202,25 @@ public class Main extends Application {
         if(d.isDrawMesh())
             drawMesh(graphics);
 
+/*        if(d.isDrawPoles());
+            drawPoles(graphics);*/
+
     }
+
+    /*
+    Turn the displacement into an object with parameters representing the actual displacement along with the displacement affected by the screen dimensions
+     */
+
+/*    private void drawPoles(GraphicsContext graphics) {
+        graphics.setLineWidth(1);
+        graphics.setStroke(Color.PURPLE);
+        graphics.strokeLine(
+                0, d.getScreenHeight()/2 + p.getDisplacement().getY(), d.getScreenWidth(), d.getScreenHeight()/2 + p.getDisplacement().getY()//Horizontal Line
+        );
+        graphics.strokeLine(
+                d.getScreenWidth()/2 + p.getDisplacement().getX(), 0, d.getScreenWidth()/2 + p.getDisplacement().getX(), d.getScreenHeight()
+        );
+    }*/
 
     private void drawMesh(GraphicsContext graphics) {
         graphics.setLineWidth(0.5);
@@ -254,7 +288,7 @@ public class Main extends Application {
                             p.getParticle(j).addMass(p.getParticle(i).getMass()); // TODO: 11/02/2020 turn the kinetic energy into temperature
 
                             double finalKineticEnergy = p.getParticle(j).getKE();
-                            p.getParticle(j).incTemperature(initialKineticEnergy - finalKineticEnergy);
+                            p.getParticle(j).incTemperature((initialKineticEnergy - finalKineticEnergy)/(p.getParticle(j).getMass()*1000));
 
                             p.destroyParticle(i);
                         } else {
@@ -277,10 +311,11 @@ public class Main extends Application {
                             p.getParticle(i).addMass(p.getParticle(j).getMass());
 
                             double finalKineticEnergy = p.getParticle(i).getKE();
-                            p.getParticle(i).incTemperature(initialKineticEnergy - finalKineticEnergy);
+                            p.getParticle(i).incTemperature((initialKineticEnergy - finalKineticEnergy)/(p.getParticle(i).getMass()*1000));
 
                             p.destroyParticle(j);
                         }
+//                        p.addRandomParticle(); //Adding a replacement particle whenever a particle is destroyed
 
                     }
                     else {

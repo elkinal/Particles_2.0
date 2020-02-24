@@ -141,6 +141,16 @@ public class Particle {
                 graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
                 graphics.fillText(String.valueOf(temperature) + "K", getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY());
             }
+
+            if(Main.p.isShowData()) {
+                graphics.setFill(Paint.valueOf("purple"));
+                graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
+
+                graphics.fillText(String.valueOf(mass) + " Kg\n" + velocity.magnitude() + " m/s\n" + getKE() + " J",
+                        getScaledCenterLocation().getX() + getDimensions() + Main.p.getDisplacement().getX(),
+                        getScaledCenterLocation().getY() + Main.p.getDisplacement().getY()
+                );
+            }
         }
     }
 }

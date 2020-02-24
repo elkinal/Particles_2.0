@@ -1,6 +1,7 @@
 package main;
 
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
@@ -10,8 +11,10 @@ public class ParticleController {
     private int particleSize;
     private double gravConstant;
     private double dampening;
+
     private boolean paused;
     private boolean drawParticles;
+    private boolean showData;
 
     private double scale;
     private Point2D displacement;
@@ -29,6 +32,7 @@ public class ParticleController {
         this.scale = 1;
         this.timeScale = 1/gravConstant;
         this.displacement = new Point2D(0, 0);
+        this.showData = false;
     }
 
     //Setters and Mutators
@@ -71,6 +75,10 @@ public class ParticleController {
 
     public void flipDrawParticles() {
         drawParticles = !drawParticles;
+    }
+
+    public void flipShowData() {
+        showData = !showData;
     }
 
     //Getters for all methods
@@ -116,5 +124,24 @@ public class ParticleController {
 
     public Point2D getDisplacement() {
         return displacement;
+    }
+
+    public boolean isShowData() {
+        return showData;
+    }
+
+    public void addRandomParticle() {
+        Main.p.addParticle(new Particle(
+                (int) Main.rand(2,200), //MASS
+                Color.BLACK, //COLOR
+                    /*new Point2D(rand(
+                            (d.getScreenWidth()-d.getScreenHeight())/2,
+                            (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)
+                    ), rand(0, d.getScreenHeight()))*/
+                new Point2D(Main.rand(
+                        Main.d.getScreenWidth() * -5,
+                        Main.d.getScreenWidth() * 5
+                ), Main.rand(Main.d.getScreenHeight()*-5, Main.d.getScreenHeight()*5))
+        ));
     }
 }
