@@ -13,13 +13,13 @@ import javafx.scene.text.FontWeight;
 import static java.lang.Math.*;
 
 public class Particle {
-    private int mass;
+    private double mass;
     private Color color;
     private Point2D location;
     private Point2D velocity;
     private float temperature;
 
-    public Particle(int mass, Color color, Point2D location) {
+    public Particle(double mass, Color color, Point2D location) {
         this.mass = mass;
         this.color = color;
         this.location = location;
@@ -28,7 +28,7 @@ public class Particle {
     }
 
     //A constructor that includes the velocity as well as all of the other parameters
-    public Particle(int mass, Color color, Point2D location, Point2D velocity) {
+    public Particle(double mass, Color color, Point2D location, Point2D velocity) {
         this.mass = mass;
         this.color = color;
         this.location = location;
@@ -66,7 +66,7 @@ public class Particle {
     }
 
     //Getter for the mass of the particle
-    public int getMass() {
+    public double getMass() {
         return mass;
     }
 
@@ -110,6 +110,10 @@ public class Particle {
         return 0.5 * mass * pow(velocity.magnitude(), 2);
     }
 
+    public double getThermalEnergy() {
+        return mass*1000*temperature;
+    }
+
     //Checks if the position of the particle is within the boundaries of the screen
     private boolean onScreen() {
         return !(location.getX() + getDimensions() < -Main.p.getDisplacement().getX()/Main.p.getScale() || location.getX() - getDimensions() > Main.d.getScreenWidth()/Main.p.getScale() - Main.p.getDisplacement().getX()
@@ -131,11 +135,9 @@ public class Particle {
     //This method draws the particle on the GraphicsContext each frame
     public void draw(GraphicsContext graphics) {
         if(onScreen()) {
-            graphics.setFill(Paint.valueOf("black"));
+            graphics.setFill(color);
             graphics.fillOval(getScaledCenterLocation().getX() + Main.p.getDisplacement().getX(), getScaledCenterLocation().getY() + Main.p.getDisplacement().getY(), getDimensions(), getDimensions());
 
-
-            //Drawing the temperature of the particle next to it todo Check the temperature scaling Q=mcT
             if(Main.p.isDrawParticles()) {
                 graphics.setFill(Paint.valueOf("red"));
                 graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
@@ -146,7 +148,8 @@ public class Particle {
                 graphics.setFill(Paint.valueOf("purple"));
                 graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
 
-                graphics.fillText(String.valueOf(mass) + " Kg\n" + velocity.magnitude() + " m/s\n" + getKE() + " J",
+                graphics.fillText("[MASS] : " + mass + "\n[SPEED] : " + velocity.magnitude() + "\n[KINETIC ENERGY] : " + getKE() + "\n[TEMPERATURE] : " + temperature
+                        + "\n[TOTAL ENERGY]" + (getKE() + getThermalEnergy()),
                         getScaledCenterLocation().getX() + getDimensions() + Main.p.getDisplacement().getX(),
                         getScaledCenterLocation().getY() + Main.p.getDisplacement().getY()
                 );

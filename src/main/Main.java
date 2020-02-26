@@ -4,11 +4,9 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.ImageCursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -17,16 +15,16 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.awt.*;
-import java.io.FileInputStream;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Main extends Application {
 
-    // TODO: 12/02/2020 A Scale must be added
+    // TODO: 12/02/2020 A Scale must be added + occasional moderate FPS drops. Most significant when there are only two objects orbiting consistently in a stable orbit
 
     public static Display d;
-    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 6.67430 * Math.pow(10, -11), 0.00000001);
+    public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 6.67430 * Math.pow(10, -11), 0.00000001, 1);
 
     Point2D[] particlePositions = new Point2D[2];
 
@@ -45,20 +43,21 @@ public class Main extends Application {
 
 
 
+
+
         //TESTING AREA
         //F=MA TEST ---------------------------------------------------------
-        /*particles.add(new Particle(300, Color.RED, new Point2D(500, 500)));
-        particles.add(new Particle(100, Color.RED, new Point2D(800, 500)));
-        particles.add(new Particle(100, Color.RED, new Point2D(1000, 500)));
-        particles.add(new Particle(100, Color.BLUE, new Point2D(650, 500)));
-        particles.get(0).setVelocity(new Point2D(1, 0));
-        particles.get(1).setVelocity(new Point2D(-1, 0));
-        particles.get(2).setVelocity(new Point2D(-1, 0));
-        particles.get(3).setVelocity(new Point2D(-1, 0));*/
+/*        p.addParticle(new Particle(300, Color.RED, new Point2D(500, 500)));
+        p.addParticle(new Particle(100, Color.RED, new Point2D(800, 500)));
+        p.addParticle(new Particle(100, Color.RED, new Point2D(1000, 500)));
+        p.addParticle(new Particle(100, Color.BLUE, new Point2D(650, 500)));
+        p.getParticle(0).setVelocity(new Point2D(1, 0));
+        p.getParticle(1).setVelocity(new Point2D(-1, 0));
+        p.getParticle(2).setVelocity(new Point2D(-1, 0));
+        p.getParticle(3).setVelocity(new Point2D(-1, 0));*/
 
         //BROKEN ORBITALS TEST -------------------------------------------------
 /*        particles.add(new Particle(100000, Color.RED, new Point2D(1000, 500)));
-
         particles.add(new Particle(1000000, Color.RED, new Point2D(600, 700)));*/
 
 
@@ -69,16 +68,28 @@ public class Main extends Application {
             p.addParticle(new Particle(
                     (int) rand(2,200), //MASS
                     Color.BLACK, //COLOR
-                    /*new Point2D(rand(
+                    new Point2D(rand(
                             (d.getScreenWidth()-d.getScreenHeight())/2,
                             (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)
-                    ), rand(0, d.getScreenHeight()))*/
-                    new Point2D(rand( //Adding particles beyond the screen
-                            Main.d.getScreenWidth() * -5,
-                            Main.d.getScreenWidth() * 5
-                    ), rand(Main.d.getScreenHeight()*-5, d.getScreenHeight()*5))
+                    ), rand(0, d.getScreenHeight()))
+//                    new Point2D(rand( //Adding particles beyond the screen
+//                            Main.d.getScreenWidth() * -5,
+//                            Main.d.getScreenWidth() * 5
+//                    ), rand(Main.d.getScreenHeight()*-5, d.getScreenHeight()*5))
             ));
         }
+
+        //todo MODELLING THE SOLAR SYSTEM
+/*        p.setScale(1/Math.pow(10, 8));
+
+        //Initial Displacement
+//        p.setDisplacement(new Point2D(d.getScreenWidth()/2, d.getScreenHeight()/2));
+
+        //The sun
+        p.addParticle(
+                new Particle(1.989 * Math.pow(10, 30), Color.RED, new Point2D(0, 0))
+        );*/
+
 
 
         //Forces the game to be played full-screen
@@ -100,13 +111,13 @@ public class Main extends Application {
                 d.flipDrawMesh();
             if(event.getCode() == KeyCode.T)
                 p.flipDrawParticles();
-            if(event.getCode() == KeyCode.Q)
+            if(event.getCode() == KeyCode.F)
                 p.flipShowData();
 
             if(event.getCode() == KeyCode.E)
-                p.incParticleSize(100);
+                p.incParticleSize(50);
             if(event.getCode() == KeyCode.Q)
-                p.incParticleSize(-100);
+                p.incParticleSize(-50);
 
             if(event.getCode() == KeyCode.W)
                 p.incDisplacement(0, -20);
@@ -143,16 +154,29 @@ public class Main extends Application {
 
 
         //Allowing the user to change the size of the created particle using the scroll wheel
+
+//        double scaleIncrease = 1/Math.pow(10, 10); //For solar system model
+        double scaleIncrease = 0.01; //For particles model
+
+/*        scene.setOnScroll(event -> {
+            if(event.getDeltaY() < 0) {
+                p.incScale(scaleIncrease);
+                p.incDisplacement(0, -d.getScreenHeight()*(0.5*scaleIncrease));
+                p.incDisplacement(-d.getScreenWidth()*(0.5*scaleIncrease), 0);
+            }
+            else {
+                p.incScale(-scaleIncrease);
+                p.incDisplacement(0, d.getScreenHeight()*(0.5*scaleIncrease));
+                p.incDisplacement(d.getScreenWidth()*(0.5*scaleIncrease), 0);
+            }
+        });*/
+
         scene.setOnScroll(event -> {
             if(event.getDeltaY() < 0) {
-                p.incScale(0.01);
-                p.incDisplacement(0, -d.getScreenHeight()*0.005);
-                p.incDisplacement(-d.getScreenWidth()*0.005, 0);
+                zoom(scaleIncrease, MouseInfo.getPointerInfo().getLocation().getX(), MouseInfo.getPointerInfo().getLocation().getY());
             }
-            else if (p.getScale() > 0.01) {
-                p.incScale(-0.01);
-                p.incDisplacement(0, d.getScreenHeight()*0.005);
-                p.incDisplacement(d.getScreenWidth()*0.005, 0);
+            else {
+                zoom(-scaleIncrease, MouseInfo.getPointerInfo().getLocation().getX(), MouseInfo.getPointerInfo().getLocation().getY());
             }
         });
 
@@ -192,6 +216,7 @@ public class Main extends Application {
         graphics.fillText("FPS: " + getFPS(), d.getScreenWidth()-270, 12);
         graphics.fillText("Particles: " + p.getParticleNumber(), d.getScreenWidth()-270, 24);
         graphics.fillText("Time Scaling: x" + p.getTimeScale(), d.getScreenWidth()-270, 36);
+        graphics.fillText("Size Scaling: x" + round(p.getScale(), 2), d.getScreenWidth()-270, 48);
 
 /*        //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
         if(drawPath)
@@ -369,16 +394,35 @@ public class Main extends Application {
     }
 
 
-
-
-
-
-
-
-
+    // TODO: 24/02/2020 All the maths methods should be extracted to another class
     //Generates a random number between "max" and "min"
     public static float rand(float min, float max) {
         return new Random().nextInt((int) (max - min + 1)) + min;
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
+    public static void zoom(double amount, double toX, double toY) {
+        double oldZ = p.getScale();
+        p.incScale(amount);
+
+        double mouse_x = toX-p.getDisplacement().getX();
+        double mouse_y = toY-p.getDisplacement().getY();
+
+        double newx = mouse_x * (p.getScale()/oldZ);
+        double newy = mouse_y * (p.getScale()/oldZ);
+
+
+        System.out.println(toX);
+
+        p.setDisplacement(new Point2D(toX-newx, toY-newy));
     }
 
     //Launches the Main function

@@ -22,14 +22,14 @@ public class ParticleController {
 
 
 
-    public ParticleController(int particleSize, boolean paused, ArrayList<Particle> particles, double gravConstant, double dampening) {
+    public ParticleController(int particleSize, boolean paused, ArrayList<Particle> particles, double gravConstant, double dampening, double scale) {
         this.particleSize = particleSize;
         this.paused = paused;
         this.particles = particles;
         this.gravConstant = gravConstant;
         this.dampening = dampening;
 
-        this.scale = 1;
+        this.scale = scale;
         this.timeScale = 1/gravConstant;
         this.displacement = new Point2D(0, 0);
         this.showData = false;
@@ -84,6 +84,10 @@ public class ParticleController {
     //Getters for all methods
     public int getParticleSize() {
         return particleSize;
+    }
+
+    public void setDisplacement(Point2D displacement) {
+        this.displacement = displacement;
     }
 
     public boolean isPaused() {
