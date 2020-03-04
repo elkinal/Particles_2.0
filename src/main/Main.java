@@ -16,15 +16,29 @@ import javafx.stage.Stage;
 
 import java.awt.*;
 import java.awt.event.MouseListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Main extends Application {
 
     // TODO: 12/02/2020 A Scale must be added + occasional moderate FPS drops. Most significant when there are only two objects orbiting consistently in a stable orbit
+    // TODO: 26/02/2020 There is an issue with the border detection which sometimes prevents particles from rendering when they should
+
+    /**
+     * How the decrease in the number of particles varies over time
+     * How the initial speed of the particles affect the decrease in particles over time
+     * How the initial speed of the particles affects the probability of a binary star system developing
+     * Conditions for orbits and binary interactions
+     * */
 
     public static Display d;
     public static ParticleController p = new ParticleController(100, false, new ArrayList<Particle>(), 6.67430 * Math.pow(10, -11), 0.00000001, 1);
+    public static Data data = new Data();
 
     Point2D[] particlePositions = new Point2D[2];
 
@@ -34,6 +48,12 @@ public class Main extends Application {
     private GraphicsContext gc;
 
     //Formation of binary stars vs one thicc cluster
+    // TODO: 03/03/2020 BUG FIXES
+    private static int framesToRecord = 100;
+    private static final int timesToRecord = 21;
+    private static int timesRecorded = 0;
+    public static final String[][] dataArray = new String[timesToRecord+1][framesToRecord+2];
+    private int ETA = 0;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -64,31 +84,44 @@ public class Main extends Application {
         // TODO: 18/02/2020 add temperature sensitivity scaling. allow the user to change the sensitivity of the temperature.
 
         //RANDOM PARTICLE TEST
-        for (int i = 0; i < 100; i++) { // TODO: 13/02/2020 Scale this appropriately
-            p.addParticle(new Particle(
-                    (int) rand(2,200), //MASS
-                    Color.BLACK, //COLOR
-                    new Point2D(rand(
-                            (d.getScreenWidth()-d.getScreenHeight())/2,
-                            (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)
-                    ), rand(0, d.getScreenHeight()))
-//                    new Point2D(rand( //Adding particles beyond the screen
-//                            Main.d.getScreenWidth() * -5,
-//                            Main.d.getScreenWidth() * 5
-//                    ), rand(Main.d.getScreenHeight()*-5, d.getScreenHeight()*5))
-            ));
-        }
+//        addParticles(timesRecorded);
 
         //todo MODELLING THE SOLAR SYSTEM
 /*        p.setScale(1/Math.pow(10, 8));
 
         //Initial Displacement
-//        p.setDisplacement(new Point2D(d.getScreenWidth()/2, d.getScreenHeight()/2));
+        p.setDisplacement(new Point2D(d.getScreenWidth()/2, d.getScreenHeight()/2));
 
-        //The sun
+        //The SUN
         p.addParticle(
                 new Particle(1.989 * Math.pow(10, 30), Color.RED, new Point2D(0, 0))
+        );
+
+        //The EARTH
+        p.addParticle(
+                new Particle(5.972 * Math.pow(10, 24), Color.RED, new Point2D(148.11 * Math.pow(10, 9), 0), new Point2D(0, 100))
         );*/
+
+
+        //RECORDING THE INITIAL DATA OF THE EXPERIMENT
+        /** Recording the Initial Kinetic and Thermal Energy*/
+        double totalKE = 0;
+        double totalTE = 0;
+        double totalGPE = 0;
+
+        for (int i = 0; i < p.getParticles().size(); i++) { //Getting the Kinetic and Thermal Energy
+            totalKE += p.getParticle(i).getKE();
+            totalTE += p.getParticle(i).getThermalEnergy();
+        }
+
+        data.setInitialKE(totalKE);
+        data.setInitialTemperature(totalTE);
+        data.setInitialGPE(totalGPE);
+
+
+
+
+
 
 
 
@@ -127,6 +160,48 @@ public class Main extends Application {
                 p.incDisplacement(0, 20);
             if(event.getCode() == KeyCode.D)
                 p.incDisplacement(20, 0);
+
+            if(event.getCode() == KeyCode.ESCAPE) { //At this point all of the useful data should be given to the user
+                //RECORDING THE FINAL DATA OF THE EXPERIMENT
+                /** Recording the Kinetic and Thermal Energy (final)*/
+                double totalFKE = 0;
+                double totalFTE = 0;
+
+                for (int i = 0; i < p.getParticles().size(); i++) {
+                    totalFKE += p.getParticle(i).getKE();
+                    totalFTE += p.getParticle(i).getThermalEnergy();
+                }
+
+                data.setFinalKE(totalFKE);
+                data.setFinalTemperature(totalFTE);
+
+                /**Finding the Center of Mass*/
+                Point2D total = new Point2D(0, 0);
+                double sumOfMasses = 0;
+
+                for (int i = 0; i < p.getParticles().size(); i++) {
+                    total = total.add(p.getParticle(i).getMass() * p.getParticle(i).getCenterLocation().getX(), p.getParticle(i).getMass() * p.getParticle(i).getCenterLocation().getY());
+                    sumOfMasses += p.getParticle(i).getMass();
+                }
+
+                Point2D centerOfMass = new Point2D(total.getX()/sumOfMasses, total.getY()/sumOfMasses); //The Center of Mass
+
+                /**Calculating the Gravitational Potential Energy*/
+                double GPE = 0;
+                for (int i = 0; i < p.getParticles().size(); i++) {
+                    GPE -= (p.getGravConstant() * p.getParticle(i).getMass() * sumOfMasses)/(p.getParticle(i).getCenterLocation().distance(centerOfMass));
+                }
+
+                System.out.println("GPE: " + GPE);
+
+
+
+
+
+                System.out.println(centerOfMass);
+
+                System.out.println(data);
+            }
         });
 
 
@@ -217,6 +292,8 @@ public class Main extends Application {
         graphics.fillText("Particles: " + p.getParticleNumber(), d.getScreenWidth()-270, 24);
         graphics.fillText("Time Scaling: x" + p.getTimeScale(), d.getScreenWidth()-270, 36);
         graphics.fillText("Size Scaling: x" + round(p.getScale(), 2), d.getScreenWidth()-270, 48);
+        graphics.fillText("Frames Elapsed: " + d.getFrames(), d.getScreenWidth()-270, 60);
+        graphics.fillText("ETA (sec): " + ETA, d.getScreenWidth()-270, 72);
 
 /*        //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
         if(drawPath)
@@ -390,7 +467,33 @@ public class Main extends Application {
         p.getParticles().forEach(p -> p.tick());
 
         //Incrementing the number of elapsed frames (for development purposes)
-        d.incFrames();
+        if(!p.isPaused())
+            d.incFrames();
+
+
+        /** This part is responsible for restarting the simulation when data has been collected
+         * The simulation should restart when the number of particles is smaller than 3 or a certain number of frames has elapsed*/
+
+        /** Recording data in the Array after every frame*/
+        dataArray[timesRecorded][(int) d.getFrames()] = String.valueOf(p.getParticles().size()); //index=frames, value=particle number
+
+/*        //Updating the ETA
+        if(d.getFrames() % 300 == 0)
+            ETA = (int) ((framesToRecord - d.getFrames()) / getFPS());*/
+
+        if(p.getParticles().size() < 3 || d.getFrames() > framesToRecord){
+            p.getParticles().clear();
+            addParticles(timesRecorded);
+
+            /**Number of particles, time (by frame), should be recorded in CSV*/
+            writeData();
+
+            d.resetFrames();
+
+            timesRecorded++;
+        }
+        if(timesRecorded >= timesToRecord)
+            p.pause();
     }
 
 
@@ -398,6 +501,10 @@ public class Main extends Application {
     //Generates a random number between "max" and "min"
     public static float rand(float min, float max) {
         return new Random().nextInt((int) (max - min + 1)) + min;
+    }
+
+    public static float randSign() {
+        return Math.random() > 0.5 ? -1 : 1;
     }
 
     public static double round(double value, int places) {
@@ -420,10 +527,96 @@ public class Main extends Application {
         double newy = mouse_y * (p.getScale()/oldZ);
 
 
-        System.out.println(toX);
+//        System.out.println(toX);
 
         p.setDisplacement(new Point2D(toX-newx, toY-newy));
     }
+
+    public void addParticles(int iteration) {
+        //RANDOM PARTICLE TEST
+        if(iteration >= 0 && iteration <= 10) {
+            for (int i = 0; i < 100; i++) { // TODO: 13/02/2020 Scale this appropriately
+                p.addParticle(new Particle(
+                        (int) rand(2, 200), //MASS
+                        Color.BLACK, //COLOR
+/*                    new Point2D(rand(
+                            (d.getScreenWidth()-d.getScreenHeight())/2,
+                            (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)
+                    ), rand(0, d.getScreenHeight())),
+                    new Point2D(rand(-1, 1), rand(-1, 1))*/
+                        new Point2D(rand( //Adding particles beyond the screen
+                                Main.d.getScreenHeight() * -5,
+                                Main.d.getScreenHeight() * 5
+                        ), rand(Main.d.getScreenHeight() * -5, d.getScreenHeight() * 5))
+                ));
+            }
+        }
+        else if(iteration > 10 && iteration <= 20) {
+            for (int i = 0; i < 100; i++) { // TODO: 13/02/2020 Scale this appropriately
+                p.addParticle(new Particle(
+                        (int) rand(2, 200), //MASS
+                        Color.BLACK, //COLOR
+                        new Point2D(rand( //Adding particles beyond the screen
+                                Main.d.getScreenHeight() * -5,
+                                Main.d.getScreenHeight() * 5
+                        ), rand(Main.d.getScreenHeight() * -5, d.getScreenHeight() * 5)),
+                        new Point2D(randSign() * 0.2 *iteration/p.getTimeScale() * Math.random(), randSign() * 0.2 * iteration/p.getTimeScale() * Math.random())
+                ));
+            }
+        }
+    }
+
+    public void writeData() { //Time, Position, Velocity, Average Velocity
+        try {
+
+
+
+            /*FileWriter myWriter = new FileWriter("C:\\Users\\Alexey\\Desktop\\N-Body.csv");
+            myWriter.write(String.valueOf(d.getFrames()) + p.getParticles().size());
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");*/
+
+            /** Recording the Data in Excel using a CSV file*/
+            BufferedWriter br = new BufferedWriter(new FileWriter("C:\\Users\\Alexey\\Desktop\\N-Body.csv"));
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("Frames");
+            sb.append(",");
+            for (int i = 0; i < dataArray.length-1; i++) {
+                sb.append("Particles_" + (i+1));
+                sb.append(",");
+            }
+
+            for (int i = 0; i < dataArray[0].length; i++) {
+                sb.append(i);
+                sb.append(",");
+
+                for (int j = 0; j < dataArray.length; j++) {
+                    if(dataArray[j][i] != null) {
+                        sb.append(dataArray[j][i]);
+                        sb.append(",");
+                    }
+                }
+                sb.append("\n");
+            }
+
+            br.write(sb.toString());
+            br.close();
+
+
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public void excelDisplace(StringBuilder sb) {
+        for (int i = 0; i < timesRecorded*2; i++) {
+            sb.append(",");
+        }
+    }
+
+
 
     //Launches the Main function
     public static void main(String[] args) {

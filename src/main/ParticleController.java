@@ -30,7 +30,8 @@ public class ParticleController {
         this.dampening = dampening;
 
         this.scale = scale;
-        this.timeScale = 1/gravConstant;
+//        this.timeScale = 1/(gravConstant*1000000);
+        this.timeScale = 1/(gravConstant);
         this.displacement = new Point2D(0, 0);
         this.showData = false;
     }
@@ -71,6 +72,10 @@ public class ParticleController {
     //Boolean Toggles
     public void unpause() {
         paused = !paused;
+    }
+
+    public void pause() {
+        paused = true;
     }
 
     public void flipDrawParticles() {

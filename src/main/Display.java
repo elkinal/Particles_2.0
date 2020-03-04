@@ -44,6 +44,10 @@ public class Display {
         drawPoles = !drawPoles;
     }
 
+    public void resetFrames() {
+        frames = 0;
+    }
+
     //Getters for all the variables
     public int getScreenHeight() {
         return screenHeight;

@@ -116,8 +116,9 @@ public class Particle {
 
     //Checks if the position of the particle is within the boundaries of the screen
     private boolean onScreen() {
-        return !(location.getX() + getDimensions() < -Main.p.getDisplacement().getX()/Main.p.getScale() || location.getX() - getDimensions() > Main.d.getScreenWidth()/Main.p.getScale() - Main.p.getDisplacement().getX()
-                || location.getY() + getDimensions() < -Main.p.getDisplacement().getY()/Main.p.getScale() || location.getY() - getDimensions() > Main.d.getScreenHeight()/Main.p.getScale() - Main.p.getDisplacement().getY());
+        /*return !(location.getX() + getDimensions() < -Main.p.getDisplacement().getX()/Main.p.getScale() || location.getX() - getDimensions() > Main.d.getScreenWidth()/Main.p.getScale() - Main.p.getDisplacement().getX()
+                || location.getY() + getDimensions() < -Main.p.getDisplacement().getY()/Main.p.getScale() || location.getY() - getDimensions() > Main.d.getScreenHeight()/Main.p.getScale() - Main.p.getDisplacement().getY());*/
+        return true; // TODO: 26/02/2020 Fix this function to increase the FPS
     }
     //This method contains all the calculations performed on the particle each frame
     public void tick() {
@@ -149,7 +150,7 @@ public class Particle {
                 graphics.setFont(Font.font("Verdana", FontWeight.BOLD, 8));
 
                 graphics.fillText("[MASS] : " + mass + "\n[SPEED] : " + velocity.magnitude() + "\n[KINETIC ENERGY] : " + getKE() + "\n[TEMPERATURE] : " + temperature
-                        + "\n[TOTAL ENERGY]" + (getKE() + getThermalEnergy()),
+                        + "\n[TOTAL ENERGY]" + (getKE() + getThermalEnergy() + "\nLocation: " + getCenterLocation()),
                         getScaledCenterLocation().getX() + getDimensions() + Main.p.getDisplacement().getX(),
                         getScaledCenterLocation().getY() + Main.p.getDisplacement().getY()
                 );
