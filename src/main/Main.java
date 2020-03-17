@@ -15,13 +15,10 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.awt.*;
-import java.awt.event.MouseListener;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 public class Main extends Application {
@@ -49,9 +46,10 @@ public class Main extends Application {
 
     //Formation of binary stars vs one thicc cluster
     // TODO: 03/03/2020 BUG FIXES
-    private static int framesToRecord = 100;
-    private static final int timesToRecord = 21;
+    private static int framesToRecord = 10000;
+    private static final int timesToRecord = 41;
     private static int timesRecorded = 0;
+
     public static final String[][] dataArray = new String[timesToRecord+1][framesToRecord+2];
     private int ETA = 0;
 
@@ -293,7 +291,7 @@ public class Main extends Application {
         graphics.fillText("Time Scaling: x" + p.getTimeScale(), d.getScreenWidth()-270, 36);
         graphics.fillText("Size Scaling: x" + round(p.getScale(), 2), d.getScreenWidth()-270, 48);
         graphics.fillText("Frames Elapsed: " + d.getFrames(), d.getScreenWidth()-270, 60);
-        graphics.fillText("ETA (sec): " + ETA, d.getScreenWidth()-270, 72);
+        graphics.fillText("Recording Iteration " + timesRecorded, d.getScreenWidth()-270, 72);
 
 /*        //Drawing a line to show the path a particle will take when the user creates a particle with an initial velocity
         if(drawPath)
@@ -481,7 +479,7 @@ public class Main extends Application {
         if(d.getFrames() % 300 == 0)
             ETA = (int) ((framesToRecord - d.getFrames()) / getFPS());*/
 
-        if(p.getParticles().size() < 3 || d.getFrames() > framesToRecord){
+        if(p.getParticles().size() < 3 || d.getFrames() > framesToRecord){ // TODO: 04/03/2020 A minor error when the first rows of the first column
             p.getParticles().clear();
             addParticles(timesRecorded);
 
@@ -499,8 +497,18 @@ public class Main extends Application {
 
     // TODO: 24/02/2020 All the maths methods should be extracted to another class
     //Generates a random number between "max" and "min"
-    public static float rand(float min, float max) {
+    public static double rand(double min, double max) {
         return new Random().nextInt((int) (max - min + 1)) + min;
+    }
+
+    public static Point2D randCircle(double radius, double circle_x, double circle_y) {
+        double alpha = 2 * Math.PI * Math.random();
+        double r = radius * Math.sqrt(Math.random());
+
+        double x = r * Math.cos(alpha) + circle_x;
+        double y = r * Math.sin(alpha) + circle_y;
+
+        return new Point2D(x, y);
     }
 
     public static float randSign() {
@@ -526,44 +534,52 @@ public class Main extends Application {
         double newx = mouse_x * (p.getScale()/oldZ);
         double newy = mouse_y * (p.getScale()/oldZ);
 
-
-//        System.out.println(toX);
-
         p.setDisplacement(new Point2D(toX-newx, toY-newy));
     }
 
-    public void addParticles(int iteration) {
-        //RANDOM PARTICLE TEST
-        if(iteration >= 0 && iteration <= 10) {
-            for (int i = 0; i < 100; i++) { // TODO: 13/02/2020 Scale this appropriately
+    private void addParticles(int iteration) {
+
+        double viewDimensions = Main.d.getScreenWidth() * 5;
+
+        if(iteration >= 0 & iteration <= 10) { // TODO: 04/03/2020 The first two columns are displaced 2 cells to the right
+            for (int i = 0; i < (iteration*50); i++) { // TODO: FIRST Experiment - ###-PARTICLE NUMBERS-### [circle  ~  X*50 PARTICLES  ~  2-200 size  ~  nospeed] {10 TIMES}
                 p.addParticle(new Particle(
-                        (int) rand(2, 200), //MASS
+                        (iteration)*10000, //MASS
                         Color.BLACK, //COLOR
-/*                    new Point2D(rand(
-                            (d.getScreenWidth()-d.getScreenHeight())/2,
-                            (d.getScreenWidth()-(d.getScreenWidth()-d.getScreenHeight())/2)
-                    ), rand(0, d.getScreenHeight())),
-                    new Point2D(rand(-1, 1), rand(-1, 1))*/
-                        new Point2D(rand( //Adding particles beyond the screen
-                                Main.d.getScreenHeight() * -5,
-                                Main.d.getScreenHeight() * 5
-                        ), rand(Main.d.getScreenHeight() * -5, d.getScreenHeight() * 5))
+                        randCircle(viewDimensions, d.getScreenWidth()/2, d.getScreenHeight()/2)
                 ));
             }
         }
         else if(iteration > 10 && iteration <= 20) {
-            for (int i = 0; i < 100; i++) { // TODO: 13/02/2020 Scale this appropriately
+            for (int i = 0; i < 100; i++) { // TODO: SECOND Experiment - ###-CONTROL-### [CIRCLE  ~  200 particles  ~  2-200 size  ~  nospeed] {10 TIMES}
                 p.addParticle(new Particle(
-                        (int) rand(2, 200), //MASS
-                        Color.BLACK, //COLOR
-                        new Point2D(rand( //Adding particles beyond the screen
-                                Main.d.getScreenHeight() * -5,
-                                Main.d.getScreenHeight() * 5
-                        ), rand(Main.d.getScreenHeight() * -5, d.getScreenHeight() * 5)),
-                        new Point2D(randSign() * 0.2 *iteration/p.getTimeScale() * Math.random(), randSign() * 0.2 * iteration/p.getTimeScale() * Math.random())
+                        rand(2, 200), //MASS
+                        Color.BLUE, //COLOR
+                        randCircle(viewDimensions, d.getScreenWidth()/2, d.getScreenHeight()/2)
                 ));
             }
         }
+        else if(iteration > 20 && iteration <= 30) {
+            for (int i = 0; i < 100; i++) { // TODO: THIRD Experiment - ####-PARTICLE VELOCITY-### [SQUARE  ~  200 particles  ~  2-200 size  ~  nospeed] {10 TIMES}
+                p.addParticle(new Particle(
+                        rand(2, 200), //MASS
+                        Color.RED, //COLOR
+                        randCircle(viewDimensions, d.getScreenWidth()/2, d.getScreenHeight()/2),
+
+                        new Point2D(randSign() * 0.1 *iteration/p.getTimeScale() * Math.random(), randSign() * 0.1 * iteration/p.getTimeScale() * Math.random())
+                ));
+            }
+        }
+        else if(iteration > 30 && iteration <= 40) {
+            for (int i = 0; i < 100; i++) { // TODO: FOURTH Experiment - ####-PARTICLE SIZE-### [SQUARE  ~  200 particles  ~  2-200 size  ~  nospeed] {10 TIMES}
+                p.addParticle(new Particle(
+                        (iteration-30)*100, //MASS
+                        Color.PURPLE, //COLOR
+                        randCircle(viewDimensions, d.getScreenWidth()/2, d.getScreenHeight()/2)
+                ));
+            }
+        }
+
     }
 
     public void writeData() { //Time, Position, Velocity, Average Velocity
@@ -582,16 +598,17 @@ public class Main extends Application {
 
             sb.append("Frames");
             sb.append(",");
-            for (int i = 0; i < dataArray.length-1; i++) {
+
+            for (int i = 0; i < dataArray.length-1; i++) { //Recording the column headers
                 sb.append("Particles_" + (i+1));
                 sb.append(",");
             }
 
-            for (int i = 0; i < dataArray[0].length; i++) {
+            for (int i = 0; i < dataArray[0].length; i++) { //Recording the frame number
                 sb.append(i);
                 sb.append(",");
 
-                for (int j = 0; j < dataArray.length; j++) {
+                for (int j = 0; j < dataArray.length; j++) { //Writing the actual data
                     if(dataArray[j][i] != null) {
                         sb.append(dataArray[j][i]);
                         sb.append(",");
