@@ -9,16 +9,18 @@ public class Display {
     private long frames;
 
     private boolean drawMesh;
+    private boolean drawPoles;
 
     public Display() {
 
     }
 
-    public Display(int screenWidth, int screenHeight, double scale, boolean drawMesh) {
+    public Display(int screenWidth, int screenHeight, double scale, boolean drawMesh, boolean drawPoles) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.scale = scale;
         this.drawMesh = drawMesh;
+        this.drawPoles = drawPoles;
     }
 
     //Setters and Mutators
@@ -38,6 +40,14 @@ public class Display {
         this.drawMesh = !this.drawMesh;
     }
 
+    public void flipDrawPoles() {
+        drawPoles = !drawPoles;
+    }
+
+    public void resetFrames() {
+        frames = 0;
+    }
+
     //Getters for all the variables
     public int getScreenHeight() {
         return screenHeight;
@@ -55,9 +65,14 @@ public class Display {
         return deltaTime;
     }
 
+    public boolean isDrawPoles() {
+        return drawPoles;
+    }
+
     public boolean isDrawMesh() {
         return drawMesh;
     }
+
     public long getFrames() {
         return frames;
     }
